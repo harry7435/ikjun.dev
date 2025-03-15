@@ -2,11 +2,8 @@ import Link from "next/link";
 import ThemeToggle from "./dark-mode-button";
 
 export default function Header() {
-  {
-    /* 헤더 네비게이션 */
-  }
   return (
-    <header className="fixed inset-x-0 top-0 z-10 bg-white shadow-sm dark:bg-gray-800">
+    <header className="fixed inset-x-0 top-0 z-10 bg-white/80 shadow-sm backdrop-blur-md dark:bg-gray-800/80">
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
         <div className="text-xl font-bold text-gray-800 dark:text-white">
           ikjun.dev

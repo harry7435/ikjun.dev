@@ -34,7 +34,7 @@ export default function AboutPage() {
         <section className="mb-8 flex flex-col gap-8">
           <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 자기소개 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🙋‍♂️ 자기소개
               </h2>
@@ -65,7 +65,7 @@ export default function AboutPage() {
           {/* 기술 스택 카드 */}
           <div className="hidden rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 기술 스택 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🛠 기술 스택
               </h2>
@@ -111,7 +111,7 @@ export default function AboutPage() {
           {/* 경험 카드 - 왼쪽 고정, 오른쪽 스크롤 레이아웃 */}
           <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 경험 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 💼 경험
               </h2>
@@ -121,7 +121,7 @@ export default function AboutPage() {
             <div className="p-6 pt-4 max-md:px-4">
               <div className="flex flex-col gap-8 md:flex-row">
                 {/* 왼쪽 고정 열 */}
-                <div className="w-full md:sticky md:top-36 md:h-fit md:w-1/4">
+                <div className="w-full md:sticky md:top-24 md:h-fit md:w-1/4">
                   <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                     유리프트
                     <br className="max-md:hidden" /> Product 팀
@@ -202,7 +202,7 @@ export default function AboutPage() {
             <div className="p-6 pt-4 max-md:px-4">
               <div className="flex flex-col gap-8 md:flex-row">
                 {/* 왼쪽 고정 열 */}
-                <div className="w-full md:sticky md:top-36 md:h-fit md:w-1/4">
+                <div className="w-full md:sticky md:top-24 md:h-fit md:w-1/4">
                   <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                     프로그래머스
                     <br className="max-md:hidden" /> 프론트엔드 데브코스
@@ -236,7 +236,7 @@ export default function AboutPage() {
           {/* 프로젝트 카드 - 왼쪽 고정, 오른쪽 스크롤 레이아웃 */}
           <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 프로젝트 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🚀 주요 프로젝트
               </h2>
@@ -248,7 +248,7 @@ export default function AboutPage() {
                 {/* AlgoBaro 프로젝트 */}
                 <div className="flex flex-col gap-4 md:flex-row">
                   {/* 왼쪽 고정 열 */}
-                  <div className="w-full md:sticky md:top-36 md:h-fit md:w-1/4">
+                  <div className="w-full md:sticky md:top-24 md:h-fit md:w-1/4">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                       AlgoBaro
                     </h3>
@@ -327,7 +327,7 @@ export default function AboutPage() {
                 {/* Styled 프로젝트 */}
                 <div className="flex flex-col gap-4 md:flex-row">
                   {/* 왼쪽 고정 열 */}
-                  <div className="w-full md:sticky md:top-36 md:h-fit md:w-1/4">
+                  <div className="w-full md:sticky md:top-24 md:h-fit md:w-1/4">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                       Styled
                     </h3>
@@ -405,7 +405,7 @@ export default function AboutPage() {
           {/* 자격증 및 수상 카드 */}
           <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 자격증 및 수상 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🏆 자격증 & 수상
               </h2>
@@ -426,7 +426,7 @@ export default function AboutPage() {
           {/* 연락처 & 링크 카드 */}
           <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 연락처 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 📞 연락처
               </h2>
