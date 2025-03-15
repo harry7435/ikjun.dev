@@ -3,6 +3,37 @@ import { Mail } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { FiArrowRight } from "react-icons/fi";
 import Link from "next/link";
+import { Metadata } from "next";
+
+// About 페이지의 메타데이터 설정
+export const generateMetadata = (): Metadata => {
+  return {
+    title: "About | ikjun.dev",
+    description: "프론트엔드 개발자 조익준의 소개 페이지입니다.",
+    openGraph: {
+      title: "About | ikjun.dev",
+      description: "프론트엔드 개발자 조익준의 소개 페이지입니다.",
+      type: "website",
+      locale: "ko_KR",
+      url: "https://ikjun-dev.vercel.app/about",
+      siteName: "ikjun.dev",
+      images: [
+        {
+          url: "https://ikjun-dev.vercel.app/ikjun-dev.png", // 기존 이미지 재사용
+          width: 800,
+          height: 800,
+          alt: "ikjun.dev 프로필",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "About | ikjun.dev",
+      description: "프론트엔드 개발자 조익준의 소개 페이지입니다.",
+      images: ["https://ikjun-dev.vercel.app/ikjun-dev.png"],
+    },
+  };
+};
 
 const introductionText = `
 **팀**과 함께 성장하는 개발자 **조익준**입니다.
