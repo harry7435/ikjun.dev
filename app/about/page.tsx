@@ -1,16 +1,19 @@
-import { FaGithub } from "react-icons/fa";
+import { FaExternalLinkAlt, FaGithub } from "react-icons/fa";
 import { Mail } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { FiArrowRight } from "react-icons/fi";
+import Link from "next/link";
 
 const introductionText = `
-**팀**과 함께 성장하는 개발자 조익준입니다.
+**팀**과 함께 성장하는 개발자 **조익준**입니다.
 
 UI/UX를 고려한 개발을 중요하게 생각하며, React, Next.js, TypeScript를 중심으로 성능 최적화와 디자인 시스템 구축에 관심이 많습니다.
 
-**프로그래머스 프론트엔드 데브코스**를 수료하며 3번의 팀 프로젝트에서 팀장 역할을 수행했습니다.
+현재는 **유리프트** Product 팀에서 프론트엔드 엔지니어로 **코딩밸리** 서비스를 운영하고 있습니다.
 
-개발자의 커뮤니케이션에 대해 고민하며 "**개발관계론**"이라는 주제로 발표를 진행했습니다.
+이전에는 **프로그래머스 프론트엔드 데브코스** 교육을 수료하며 3번의 팀 프로젝트에서 팀장 역할을 수행했습니다.
+
+개발자의 커뮤니케이션에 대해 고민하며 "**개발관계론**"이라는 주제로 발표를 해본 경험이 있습니다.
 `;
 
 export default function AboutPage() {
@@ -19,8 +22,8 @@ export default function AboutPage() {
       <div className="container mx-auto px-6 py-12 pt-24">
         {/* 히어로 섹션 */}
         <section className="mb-12 text-center">
-          <h1 className="mb-4 text-4xl font-bold text-gray-800 dark:text-white md:text-5xl">
-            안녕하세요! 👋
+          <h1 className="mb-4 text-2xl font-bold text-gray-800 dark:text-white md:text-3xl">
+            안녕하세요!
           </h1>
           <p className="mx-auto max-w-2xl text-xl text-gray-600 dark:text-gray-300">
             물처럼 팀과 동료에게 잘 스며드는 개발자, 조익준입니다.
@@ -31,21 +34,21 @@ export default function AboutPage() {
         <section className="mb-8 flex flex-col gap-8">
           <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 자기소개 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🙋‍♂️ 자기소개
               </h2>
             </div>
 
             {/* 자기소개 내용 */}
-            <div className="p-6 pt-4">
+            <div className="p-6 pt-4 max-md:px-4">
               <div className="text-gray-700 dark:text-gray-300">
                 <ReactMarkdown
                   components={{
                     // 강조(bold) 텍스트에 파란색 스타일 적용
                     strong: ({ ...props }) => (
                       <strong
-                        className="font-semibold text-blue-600 dark:text-blue-400"
+                        className="text-lg font-semibold text-blue-600 dark:text-blue-400"
                         {...props}
                       />
                     ),
@@ -60,16 +63,16 @@ export default function AboutPage() {
           </div>
 
           {/* 기술 스택 카드 */}
-          <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
+          <div className="hidden rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 기술 스택 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🛠 기술 스택
               </h2>
             </div>
 
             {/* 기술 스택 내용 */}
-            <div className="p-6 pt-4">
+            <div className="p-6 pt-4 max-md:px-4">
               <div className="flex flex-wrap gap-3">
                 <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                   Next.js
@@ -87,6 +90,15 @@ export default function AboutPage() {
                   Zustand
                 </span>
                 <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                  firebase
+                </span>
+                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                  hygraph(graphQL)
+                </span>
+                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                  tailwindcss
+                </span>
+                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                   Styled-Components
                 </span>
                 <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
@@ -99,21 +111,101 @@ export default function AboutPage() {
           {/* 경험 카드 - 왼쪽 고정, 오른쪽 스크롤 레이아웃 */}
           <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 경험 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 💼 경험
               </h2>
             </div>
 
             {/* 경험 내용 */}
-            <div className="p-6 pt-4">
+            <div className="p-6 pt-4 max-md:px-4">
+              <div className="flex flex-col gap-8 md:flex-row">
+                {/* 왼쪽 고정 열 */}
+                <div className="w-full md:sticky md:top-36 md:h-fit md:w-1/4">
+                  <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                    유리프트
+                    <br className="max-md:hidden" /> Product 팀
+                  </h3>
+                  <p className="mt-2 text-gray-600 dark:text-gray-400">
+                    2024.07 ~ 현재
+                  </p>
+                </div>
+
+                {/* 오른쪽 스크롤 가능한 열 */}
+                <div className="flex w-full flex-col gap-4 md:w-3/4 md:overflow-y-auto">
+                  <div>
+                    <h4 className="mb-2 font-semibold text-gray-800 dark:text-white">
+                      <Link
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href="https://www.codingvalley.com/"
+                        className="font-semibold text-blue-500 hover:text-blue-400 dark:text-blue-500 dark:hover:text-blue-400"
+                      >
+                        코딩밸리
+                        <FaExternalLinkAlt className="ml-1 inline-block size-3" />
+                      </Link>{" "}
+                      서비스 웹페이지 랜딩화 및 고도화
+                    </h4>
+                    <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
+                      <li>
+                        마케팅 전략 및 기획에 맞는 신규 페이지 및 LDM(홍보)
+                        페이지 구현 및 개선
+                      </li>
+                      <li>강의 무료체험을 위한 무료체험 페이지 구현</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="mb-2 font-semibold text-gray-800 dark:text-white">
+                      코딩밸리 PC 웹앱 전환
+                    </h4>
+                    <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
+                      <li>
+                        기존 네이티브 앱 내에 있는 강의, 커뮤니티 기능을
+                        웹앱으로 구현
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="mb-3 font-semibold text-gray-800 dark:text-white">
+                      기술 스택
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        Next.js
+                      </span>
+                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        TypeScript
+                      </span>
+                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        tailwindcss
+                      </span>
+                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        firebase
+                      </span>
+                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        hygraph(graphQL)
+                      </span>
+                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        playwright
+                      </span>
+                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        Vercel
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 pt-4 max-md:px-4">
               <div className="flex flex-col gap-8 md:flex-row">
                 {/* 왼쪽 고정 열 */}
                 <div className="w-full md:sticky md:top-36 md:h-fit md:w-1/4">
                   <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
                     프로그래머스
-                    <br />
-                    프론트엔드 데브코스
+                    <br className="max-md:hidden" /> 프론트엔드 데브코스
                   </h3>
                   <p className="mt-2 text-gray-600 dark:text-gray-400">
                     2023.09 ~ 2024.03
@@ -122,6 +214,9 @@ export default function AboutPage() {
 
                 {/* 오른쪽 스크롤 가능한 열 */}
                 <div className="w-full md:w-3/4 md:overflow-y-auto">
+                  <p className="mb-2 font-semibold text-gray-800 dark:text-white">
+                    주요 활동
+                  </p>
                   <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
                     <li>3개의 팀 프로젝트에서 팀장 역할 수행</li>
                     <li>
@@ -129,15 +224,8 @@ export default function AboutPage() {
                       프로젝트 수행
                     </li>
                     <li>TypeScript 스터디 진행 및 딥다이브 발표</li>
-                    <li className="mb-8">
-                      개발관계론 발표를 통한 팀 커뮤니케이션 개선
-                    </li>
-
-                    <li className="font-semibold text-gray-800 dark:text-white">
-                      주요 활동
-                    </li>
+                    <li>개발관계론 발표를 통한 팀 커뮤니케이션 개선</li>
                     <li>UI 컴포넌트 라이브러리 개발 및 문서화</li>
-                    <li>코드 리뷰 문화 정착 및 활성화</li>
                     <li>Git Flow 기반 브랜치 전략 수립</li>
                   </ul>
                 </div>
@@ -148,14 +236,14 @@ export default function AboutPage() {
           {/* 프로젝트 카드 - 왼쪽 고정, 오른쪽 스크롤 레이아웃 */}
           <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 프로젝트 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🚀 주요 프로젝트
               </h2>
             </div>
 
             {/* 프로젝트 내용 */}
-            <div className="p-6 pt-4">
+            <div className="p-6 pt-4 max-md:px-4">
               <div className="flex flex-col gap-12">
                 {/* AlgoBaro 프로젝트 */}
                 <div className="flex flex-col gap-4 md:flex-row">
@@ -171,22 +259,22 @@ export default function AboutPage() {
                       2023.12 ~ 2024.02
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <a
+                      <Link
                         href="https://algobaro.vercel.app/"
                         className="inline-flex items-center text-blue-500 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         배포 링크 <FiArrowRight className="ml-1 size-3" />
-                      </a>
-                      <a
+                      </Link>
+                      <Link
                         href="https://github.com/1e5i-Shark/algobaro-fe"
                         className="inline-flex items-center text-blue-500 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         GitHub <FiArrowRight className="ml-1 size-3" />
-                      </a>
+                      </Link>
                     </div>
                   </div>
 
@@ -208,7 +296,7 @@ export default function AboutPage() {
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                          Next.js
+                          React
                         </span>
                         <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                           TypeScript
@@ -217,13 +305,19 @@ export default function AboutPage() {
                           React Query
                         </span>
                         <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                          Socket.io
+                          SocketJS
                         </span>
                         <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                          Monaco Editor
+                          code mirror
                         </span>
                         <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                           Zustand
+                        </span>
+                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                          Styled-Components
+                        </span>
+                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                          Vercel
                         </span>
                       </div>
                     </div>
@@ -244,22 +338,22 @@ export default function AboutPage() {
                       2023.10 ~ 2023.12
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <a
+                      <Link
                         href="https://styled-rho.vercel.app/"
                         className="inline-flex items-center text-blue-500 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         배포 링크 <FiArrowRight className="ml-1 size-3" />
-                      </a>
-                      <a
+                      </Link>
+                      <Link
                         href="https://github.com/prgrms-fe-devcourse/FEDC5_STYLED_sehee"
                         className="inline-flex items-center text-blue-500 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         GitHub <FiArrowRight className="ml-1 size-3" />
-                      </a>
+                      </Link>
                     </div>
                   </div>
 
@@ -292,7 +386,13 @@ export default function AboutPage() {
                           Styled-Components
                         </span>
                         <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                          Zustand
+                        </span>
+                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                           Axios
+                        </span>
+                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                          Vercel
                         </span>
                       </div>
                     </div>
@@ -305,14 +405,14 @@ export default function AboutPage() {
           {/* 자격증 및 수상 카드 */}
           <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 자격증 및 수상 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🏆 자격증 & 수상
               </h2>
             </div>
 
             {/* 자격증 및 수상 내용 */}
-            <div className="p-6 pt-4">
+            <div className="p-6 pt-4 max-md:px-4">
               <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
                 <li>SQLD (한국데이터산업진흥원, 2022.12)</li>
                 <li>
@@ -326,35 +426,41 @@ export default function AboutPage() {
           {/* 연락처 & 링크 카드 */}
           <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 연락처 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-3 dark:border-gray-700 dark:bg-gray-800 md:sticky">
+            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800 md:sticky">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 📞 연락처
               </h2>
             </div>
 
             {/* 연락처 내용 */}
-            <div className="p-6 pt-4">
+            <div className="p-6 pt-4 max-md:px-4">
               <div className="flex flex-wrap gap-4">
-                <a
+                <Link
+                  target="_blank"
+                  rel="noopener noreferrer"
                   href="https://github.com/harry7435"
                   className="inline-flex items-center gap-2 text-gray-800 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                 >
                   <FaGithub size={20} />
                   GitHub
-                </a>
-                <a
+                </Link>
+                <Link
+                  target="_blank"
+                  rel="noopener noreferrer"
                   href="https://velog.io/@harry7435"
                   className="inline-flex items-center gap-2 text-gray-800 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                 >
                   Velog
-                </a>
-                <a
+                </Link>
+                <Link
+                  target="_blank"
+                  rel="noopener noreferrer"
                   href="mailto:harry960629@naver.com"
                   className="inline-flex items-center gap-2 text-gray-800 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                 >
                   <Mail size={20} />
                   Email
-                </a>
+                </Link>
               </div>
             </div>
           </div>
