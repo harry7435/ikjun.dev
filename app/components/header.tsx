@@ -30,12 +30,14 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <Link
-                href="/blog"
-                className="text-gray-600 transition-colors hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400"
+              {/* Blog 링크를 단순 스팬으로 변경하고 커서와 투명도 표시 */}
+              <span
+                className="cursor-not-allowed text-gray-400 opacity-70 dark:text-gray-500"
+                title="준비 중입니다"
               >
                 Blog
-              </Link>
+                <sup className="ml-0.5 text-xs text-blue-500">준비중</sup>
+              </span>
             </li>
             <li>
               <ThemeToggle />
