@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ThemeToggle from "./components/dark-mode-button";
+import { FiArrowRight } from "react-icons/fi";
 
 export default function Home() {
   return (
@@ -60,7 +61,7 @@ export default function Home() {
           </section>
 
           <section className="flex flex-col gap-8">
-            <div className="rounded-lg bg-white p-6 shadow transition-shadow hover:shadow-md dark:bg-gray-800">
+            <div className="rounded-lg border border-gray-100 bg-white p-6 shadow transition-all hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
               <h3 className="mb-3 text-xl font-semibold text-gray-800 dark:text-white">
                 About
               </h3>
@@ -69,13 +70,13 @@ export default function Home() {
               </p>
               <Link
                 href="/about"
-                className="text-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
+                className="inline-flex items-center text-blue-500 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
               >
-                프로필 보기 →
+                프로필 보기 <FiArrowRight className="ml-1 size-4" />
               </Link>
             </div>
 
-            <div className="rounded-lg bg-white p-6 shadow transition-shadow hover:shadow-md dark:bg-gray-800">
+            <div className="rounded-lg border border-gray-100 bg-white p-6 shadow transition-all hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
               <h3 className="mb-3 text-xl font-semibold text-gray-800 dark:text-white">
                 Blog
               </h3>
@@ -84,9 +85,9 @@ export default function Home() {
               </p>
               <Link
                 href="/blog"
-                className="text-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
+                className="inline-flex items-center text-blue-500 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
               >
-                글 보러가기 →
+                글 보러가기 <FiArrowRight className="ml-1 size-4" />
               </Link>
             </div>
           </section>
