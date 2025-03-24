@@ -5,14 +5,14 @@ interface CardLinkProps {
   href: string;
   title: string;
   postDate: string;
-  //   description: string;
+  subtitle?: string;
 }
 
 export default function PostCard({
   href,
   title,
   postDate,
-  //   description,
+  subtitle,
 }: CardLinkProps) {
   return (
     <Link href={href}>
@@ -23,10 +23,12 @@ export default function PostCard({
         <span className="mt-2 block text-xs text-gray-600">
           {format(parseISO(postDate), "LLLL d, yyyy")}
         </span>
-        {/* <div
-        className="h-[69px] overflow-hidden text-ellipsis text-gray-600 dark:text-gray-300"
-        dangerouslySetInnerHTML={{ __html: description }}
-      /> */}
+        {subtitle && (
+          <div
+            className="mt-3 max-h-[69px] overflow-hidden text-ellipsis text-gray-600 dark:text-gray-300"
+            dangerouslySetInnerHTML={{ __html: subtitle }}
+          />
+        )}
       </div>
     </Link>
   );

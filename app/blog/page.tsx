@@ -9,9 +9,9 @@ export default function BlogPage() {
   );
 
   return (
-    <main className="dark:bg-gray-900">
+    <main className="text-gray-800 dark:bg-gray-900 dark:text-white">
       <div className="container mx-auto px-6 py-12 pt-24">
-        <div className="mx-auto max-w-xl py-8">
+        <div className="mx-auto max-w-3xl py-8">
           <h1 className="mb-8 text-center text-2xl font-black">블로그 홈</h1>
           {posts.map((post, idx) => (
             <PostCard
@@ -19,7 +19,7 @@ export default function BlogPage() {
               href={post.url}
               title={post.title}
               postDate={post.date}
-              // description={post.body.html}
+              subtitle={post.subtitle}
             />
           ))}
         </div>
