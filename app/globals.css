@@ -1,3 +1,5 @@
+@import "prismjs/themes/prism-tomorrow.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -18,4 +20,33 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* 코드 블럭 스타일 */
+pre[class*="language-"] {
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+}
+
+code[class*="language-"],
+pre[class*="language-"] {
+  font-family: "Fira Code", monospace;
+}
+
+pre[class*="language-"]::-webkit-scrollbar {
+  width: 8px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 4px;
+}
+
+pre[class*="language-"]::-webkit-scrollbar-track {
+  background-color: #333;
+}
+
+pre[class*="language-"] code {
+  padding-left: 0;
 }

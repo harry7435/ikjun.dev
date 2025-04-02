@@ -13,6 +13,24 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            "pre code": {
+              backgroundColor: "#2d2d2d",
+              color: "#f8f8f2",
+              padding: "0.2rem 0.4rem",
+              borderRadius: "0.25rem",
+            },
+            code: {
+              backgroundColor: "#2d2d2d",
+              color: "#f8f8f2",
+              padding: "0.2rem 0.4rem",
+              borderRadius: "0.25rem",
+            },
+          },
+        },
+      },
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports
