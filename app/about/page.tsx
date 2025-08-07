@@ -342,6 +342,112 @@ export default function AboutPage() {
             {/* 프로젝트 내용 */}
             <div className="p-6 pt-4 max-md:px-4">
               <div className="flex flex-col gap-12">
+                {/* Choice Eat 프로젝트 */}
+                <div className="flex flex-col gap-4 md:flex-row">
+                  {/* 왼쪽 고정 열 */}
+                  <div className="w-full md:sticky md:top-24 md:h-fit md:w-1/4">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                      Choice Eat
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      위치 기반 메뉴 선택 서비스
+                    </p>
+                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                      2025.03 ~ 현재
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Link
+                        href="https://choice-eat.vercel.app/"
+                        className="inline-flex items-center text-blue-500 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        배포 링크 <FiArrowRight className="ml-1 size-3" />
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* 오른쪽 스크롤 가능한 열 */}
+                  <div className="w-full md:w-3/4 md:overflow-y-auto">
+                    <div className="mb-4">
+                      <h4 className="mb-2 font-semibold text-blue-600 dark:text-blue-400">
+                        Why - 문제 상황
+                      </h4>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        매일 반복되는 &ldquo;뭐 먹지?&rdquo; 고민과 선택 장애로
+                        인한 시간 소모, 그리고 현재 위치 주변의 맛집 정보를 찾기
+                        어려운 문제가 있었습니다.
+                      </p>
+                    </div>
+
+                    <div className="mb-4">
+                      <h4 className="mb-2 font-semibold text-green-600 dark:text-green-400">
+                        How - 해결 방법
+                      </h4>
+                      <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
+                        <li>
+                          <strong>위치 기반 서비스</strong>: 사용자의 현재
+                          위치를 기반으로 주변 음식점 검색
+                        </li>
+                        <li>
+                          <strong>랜덤 추첨 시스템</strong>: 선택 장애 해결을
+                          위한 메뉴 및 음식점 랜덤 추천
+                        </li>
+                        <li>
+                          <strong>직관적인 UI/UX</strong>: 간단한 클릭만으로
+                          메뉴를 결정할 수 있는 사용자 친화적 인터페이스
+                        </li>
+                        <li>
+                          <strong>실시간 검색</strong>: 카테고리별 음식점 검색
+                          및 필터링 기능
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="mb-6">
+                      <h4 className="mb-2 font-semibold text-purple-600 dark:text-purple-400">
+                        Result - 성과
+                      </h4>
+                      <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
+                        <li>
+                          <strong>사용자 결정 시간 단축</strong> - 복잡한 고민
+                          없이 즉시 메뉴 결정 가능
+                        </li>
+                        <li>
+                          <strong>위치 기반 맞춤 추천</strong>으로 접근성 높은
+                          맛집 발견
+                        </li>
+                        <li>
+                          <strong>반응형 웹 디자인</strong>으로 모바일/데스크톱
+                          환경 모두 지원
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="mb-3 font-semibold text-gray-800 dark:text-white">
+                        사용 기술
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
+                          Next.js
+                        </span>
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
+                          TypeScript
+                        </span>
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
+                          Geolocation API
+                        </span>
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
+                          Naver Map API
+                        </span>
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
+                          TailwindCSS
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 {/* AlgoBaro 프로젝트 */}
                 <div className="flex flex-col gap-4 md:flex-row">
                   {/* 왼쪽 고정 열 */}
