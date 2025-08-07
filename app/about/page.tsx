@@ -53,16 +53,16 @@ UI/UX를 고려한 개발을 중요하게 생각하며, React, Next.js, TypeScri
 
 export default function AboutPage() {
   return (
-    <main className="dark:bg-gray-900">
+    <main className="min-h-screen bg-stone-100 dark:bg-gray-900">
       <div className="container mx-auto px-6 py-12 pt-24">
         {/* 히어로 섹션 - 브랜딩 문구 */}
         <section className="mb-12 w-full">
-          <h1 className="mb-4 text-2xl font-bold text-gray-800 dark:text-white md:text-3xl">
+          <h1 className="mb-4 text-2xl font-bold text-gray-700 dark:text-white md:text-3xl">
             안녕하세요! 조익준입니다.
           </h1>
           {/*  한 줄 브랜딩 */}
-          <div className="mx-auto mb-6 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 p-6 dark:from-blue-900/20 dark:to-indigo-900/20">
-            <p className="text-lg font-semibold text-gray-800 dark:text-white md:text-xl">
+          <div className="mx-auto mb-6 rounded-lg bg-gradient-to-r from-amber-50/70 to-orange-50/70 p-6 shadow-sm dark:from-blue-900/20 dark:to-indigo-900/20">
+            <p className="text-lg font-semibold text-gray-700 dark:text-white md:text-xl">
               📌 {brandingStatement}
             </p>
           </div>
@@ -70,9 +70,9 @@ export default function AboutPage() {
 
         {/* 자기소개 카드 */}
         <section className="mb-8 flex flex-col gap-8">
-          <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
+          <div className="rounded-lg border border-stone-300/40 bg-stone-200/60 shadow-sm backdrop-blur-sm transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* Executive Summary 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="top-[68px] z-[1] rounded-lg border-stone-300/40 bg-stone-200/80 px-6 py-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 💡 Executive Summary
               </h2>
@@ -101,9 +101,9 @@ export default function AboutPage() {
           </div>
 
           {/* 기술 스택 카드 */}
-          <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
+          <div className="rounded-lg border border-stone-300/40 bg-stone-200/60 shadow-sm backdrop-blur-sm transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 기술 스택 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="top-[68px] z-[1] rounded-lg border-stone-300/40 bg-stone-200/80 px-6 py-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🛠 Key Tech Stack
               </h2>
@@ -112,28 +112,28 @@ export default function AboutPage() {
             {/* 기술 스택 내용 */}
             <div className="p-6 pt-4 max-md:px-4">
               <div className="flex flex-wrap gap-3">
-                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                <span className="rounded-lg bg-stone-200/60 px-3 py-1.5 text-stone-700 dark:bg-gray-700 dark:text-gray-300">
                   Next.js
                 </span>
-                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                <span className="rounded-lg bg-stone-200/60 px-3 py-1.5 text-stone-700 dark:bg-gray-700 dark:text-gray-300">
                   TypeScript
                 </span>
                 {/* <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                   React
                 </span>
-                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                <span className="rounded-lg bg-stone-200/60 px-3 py-1.5 text-stone-700 dark:bg-gray-700 dark:text-gray-300">
                   React Query
                 </span> */}
-                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                <span className="rounded-lg bg-stone-200/60 px-3 py-1.5 text-stone-700 dark:bg-gray-700 dark:text-gray-300">
                   Zustand
                 </span>
-                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                <span className="rounded-lg bg-stone-200/60 px-3 py-1.5 text-stone-700 dark:bg-gray-700 dark:text-gray-300">
                   firebase
                 </span>
-                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                <span className="rounded-lg bg-stone-200/60 px-3 py-1.5 text-stone-700 dark:bg-gray-700 dark:text-gray-300">
                   hygraph(graphQL)
                 </span>
-                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                <span className="rounded-lg bg-stone-200/60 px-3 py-1.5 text-stone-700 dark:bg-gray-700 dark:text-gray-300">
                   tailwindcss
                 </span>
                 {/* <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
@@ -147,9 +147,9 @@ export default function AboutPage() {
           </div>
 
           {/* 경험 카드 - 왼쪽 고정, 오른쪽 스크롤 레이아웃 */}
-          <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
+          <div className="rounded-lg border border-stone-300/40 bg-stone-200/60 shadow-sm backdrop-blur-sm transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 경험 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="top-[68px] z-[1] rounded-lg border-stone-300/40 bg-stone-200/80 px-6 py-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 💼 경력 & 교육
               </h2>
@@ -247,25 +247,25 @@ export default function AboutPage() {
                       기술 스택
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                         Next.js
                       </span>
-                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                         TypeScript
                       </span>
-                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                         tailwindcss
                       </span>
-                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                         firebase
                       </span>
-                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                         hygraph(graphQL)
                       </span>
-                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                         playwright
                       </span>
-                      <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                      <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                         Vercel
                       </span>
                     </div>
@@ -331,9 +331,9 @@ export default function AboutPage() {
           </div>
 
           {/* 프로젝트 카드 - 왼쪽 고정, 오른쪽 스크롤 레이아웃 */}
-          <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
+          <div className="rounded-lg border border-stone-300/40 bg-stone-200/60 shadow-sm backdrop-blur-sm transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 프로젝트 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="top-[68px] z-[1] rounded-lg border-stone-300/40 bg-stone-200/80 px-6 py-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🚀 핵심 프로젝트
               </h2>
@@ -437,25 +437,25 @@ export default function AboutPage() {
                         사용 기술
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           React
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           TypeScript
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           React Query
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           WebSocket
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           Code Mirror
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           Zustand
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           Styled-Components
                         </span>
                       </div>
@@ -557,22 +557,22 @@ export default function AboutPage() {
                         사용 기술
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           React
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           TypeScript
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           React Query
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           Styled-Components
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           Zustand
                         </span>
-                        <span className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-lg bg-amber-100/60 px-2 py-1 text-sm text-amber-800 dark:bg-blue-900/30 dark:text-blue-300">
                           Infinite Scroll
                         </span>
                       </div>
@@ -584,9 +584,9 @@ export default function AboutPage() {
           </div>
 
           {/* 자격증 및 수상 카드 */}
-          <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
+          <div className="rounded-lg border border-stone-300/40 bg-stone-200/60 shadow-sm backdrop-blur-sm transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 자격증 및 수상 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="top-[68px] z-[1] rounded-lg border-stone-300/40 bg-stone-200/80 px-6 py-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 🏆 자격증 & 수상 이력
               </h2>
@@ -595,8 +595,8 @@ export default function AboutPage() {
             {/* 자격증 및 수상 내용 */}
             <div className="p-6 pt-4 max-md:px-4">
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-lg bg-yellow-50 p-4 dark:bg-yellow-900/20">
-                  <h4 className="mb-2 font-semibold text-yellow-800 dark:text-yellow-300">
+                <div className="rounded-lg bg-amber-50/70 p-4 shadow-sm dark:bg-yellow-900/20">
+                  <h4 className="mb-2 font-semibold text-amber-800 dark:text-yellow-300">
                     🥇 DACON 공모전 1등
                   </h4>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
@@ -606,8 +606,8 @@ export default function AboutPage() {
                     📈 데이터 분석 및 시각화 역량 인정
                   </p>
                 </div>
-                <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
-                  <h4 className="mb-2 font-semibold text-blue-800 dark:text-blue-300">
+                <div className="rounded-lg bg-sky-50/70 p-4 shadow-sm dark:bg-blue-900/20">
+                  <h4 className="mb-2 font-semibold text-sky-800 dark:text-blue-300">
                     📜 SQLD 자격증
                   </h4>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
@@ -622,9 +622,9 @@ export default function AboutPage() {
           </div>
 
           {/* 연락처 & 링크 카드 */}
-          <div className="rounded-lg border border-gray-100 bg-white shadow transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
+          <div className="rounded-lg border border-stone-300/40 bg-stone-200/60 shadow-sm backdrop-blur-sm transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 연락처 헤더 - sticky 적용 */}
-            <div className="top-[68px] z-[1] rounded-lg border-gray-100 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="top-[68px] z-[1] rounded-lg border-stone-300/40 bg-stone-200/80 px-6 py-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
                 📞 Contact
               </h2>

@@ -38,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning>
-      <body className="min-h-screen bg-white dark:bg-gray-800">
+      <body className="min-h-screen bg-stone-100 dark:bg-gray-800">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

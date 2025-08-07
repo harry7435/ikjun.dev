@@ -9,7 +9,7 @@ export default function BlogPage() {
   );
 
   return (
-    <main className="text-gray-800 dark:bg-gray-900 dark:text-white">
+    <main className="min-h-screen bg-stone-100 text-stone-700 dark:bg-gray-900 dark:text-white">
       <div className="container mx-auto px-6 py-12 pt-24">
         <div className="mx-auto max-w-3xl py-8">
           <h1 className="mb-8 text-center text-2xl font-black">블로그 홈</h1>

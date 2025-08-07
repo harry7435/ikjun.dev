@@ -3,11 +3,11 @@ import ThemeToggle from "./dark-mode-button";
 
 export default function Header() {
   return (
-    <header className="fixed inset-x-0 top-0 z-10 bg-white/80 shadow-sm backdrop-blur-md dark:bg-gray-800/80">
+    <header className="fixed inset-x-0 top-0 z-10 bg-stone-200/80 shadow-sm backdrop-blur-md dark:bg-gray-800/80">
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
         <Link
           href="/"
-          className="text-xl font-bold text-gray-800 dark:text-white"
+          className="text-xl font-bold text-stone-700 dark:text-white"
         >
           ikjun.dev
         </Link>
@@ -16,7 +16,7 @@ export default function Header() {
             <li>
               <Link
                 href="/"
-                className="text-gray-600 transition-colors hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400"
+                className="text-stone-600 transition-colors hover:text-amber-600 dark:text-gray-300 dark:hover:text-amber-400"
               >
                 Home
               </Link>
@@ -24,7 +24,7 @@ export default function Header() {
             <li>
               <Link
                 href="/about"
-                className="text-gray-600 transition-colors hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400"
+                className="text-stone-600 transition-colors hover:text-amber-600 dark:text-gray-300 dark:hover:text-amber-400"
               >
                 About
               </Link>
@@ -32,7 +32,7 @@ export default function Header() {
             <li>
               <Link
                 href="/blog"
-                className="text-gray-600 transition-colors hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400"
+                className="text-stone-600 transition-colors hover:text-amber-600 dark:text-gray-300 dark:hover:text-amber-400"
               >
                 Blog
               </Link>

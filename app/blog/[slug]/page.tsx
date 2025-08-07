@@ -26,11 +26,11 @@ export default async function BlogPostDetailPage({
   if (!post) throw new Error(`Post not found for slug: ${slug}`);
 
   return (
-    <main className="text-gray-800 dark:bg-gray-900 dark:text-white">
+    <main className="min-h-screen bg-stone-100 text-stone-700 dark:bg-gray-900 dark:text-white">
       <div className="container mx-auto px-6 py-12 pt-16">
         <article className="mx-auto max-w-3xl py-8">
           <div className="mb-8 text-center">
-            <p className="mb-1 text-xs text-gray-600">
+            <p className="mb-1 text-xs text-stone-600">
               {format(parseISO(post.date), "LLLL d, yyyy")}
             </p>
             <h1 className="mt-2 text-3xl font-bold">{post.title}</h1>
