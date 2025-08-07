@@ -621,6 +621,28 @@ export default function AboutPage() {
             </div>
           </div>
 
+          {/* 학력 카드 */}
+          <div className="rounded-lg border border-stone-300/40 bg-stone-200/60 shadow-sm backdrop-blur-sm transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
+            {/* 학력 헤더 - sticky 적용 */}
+            <div className="top-[68px] z-[1] rounded-lg border-stone-300/40 bg-stone-200/80 px-6 py-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800">
+              <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
+                🎓 학력
+              </h2>
+            </div>
+
+            {/* 학력 내용 */}
+            <div className="p-6 pt-4 max-md:px-4">
+              <div className="rounded-lg bg-sky-50/70 p-4 shadow-sm dark:bg-blue-900/20">
+                <h4 className="mb-2 font-semibold text-sky-800 dark:text-blue-300">
+                  🏛️ 성균관대학교
+                </h4>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  전자전기공학부 학사 (2022.02 졸업)
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* 연락처 & 링크 카드 */}
           <div className="rounded-lg border border-stone-300/40 bg-stone-200/60 shadow-sm backdrop-blur-sm transition-[shadow,transform] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
             {/* 연락처 헤더 - sticky 적용 */}
@@ -642,14 +664,14 @@ export default function AboutPage() {
                   <FaGithub size={20} />
                   GitHub
                 </Link>
-                <Link
+                {/* <Link
                   target="_blank"
                   rel="noopener noreferrer"
                   href="https://velog.io/@harry7435"
                   className="inline-flex items-center gap-2 text-gray-800 transition-colors hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
                 >
                   Velog
-                </Link>
+                </Link> */}
                 <Link
                   target="_blank"
                   rel="noopener noreferrer"
