@@ -1,52 +1,252 @@
-@import "prismjs/themes/prism-tomorrow.css";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* 레이어를 사용하여 Tailwind와 조화롭게 작업 */
+@layer utilities {
+  .code-block-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: pre;
+    word-wrap: normal;
+    overflow-wrap: normal;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* PrismJS 기본 스타일 - 라이트/다크 모드 대응 */
+.prose pre[class*="language-"],
+.prose code[class*="language-"] {
+  font-family:
+    "Fira Code", "Consolas", "Monaco", "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 0.9em;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  tab-size: 4;
+  hyphens: none;
 }
 
-/* 코드 블럭 스타일 */
-pre[class*="language-"] {
-  padding: 1rem;
-  margin: 1rem 0;
-  border-radius: 0.5rem;
+/* 컴포넌트 레이어에 코드 블록 스타일 정의 */
+@layer components {
+  /* 라이트 모드 코드 블록 */
+  .prose pre[class*="language-"] {
+    @apply code-block-scroll;
+    padding: 1em;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .prose pre[class*="language-"] code {
+    white-space: pre;
+    word-wrap: normal;
+    overflow-wrap: normal;
+    display: block;
+    padding: 0;
+    background: transparent;
+    color: #2d3748;
+  }
+
+  /* 다크 모드 코드 블록 */
+  .dark .prose pre[class*="language-"] {
+    background: #1a202c;
+    border-color: #4a5568;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .dark .prose pre[class*="language-"] code {
+    color: #e2e8f0;
+  }
 }
 
-code[class*="language-"],
-pre[class*="language-"] {
-  font-family: "Fira Code", monospace;
+@layer components {
+  /* 커스텀 스크롤바 스타일 */
+  .prose pre[class*="language-"]::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .prose pre[class*="language-"]::-webkit-scrollbar-track {
+    background: #44475a;
+    border-radius: 4px;
+  }
+
+  .prose pre[class*="language-"]::-webkit-scrollbar-thumb {
+    background: #6272a4;
+    border-radius: 4px;
+  }
+
+  .prose pre[class*="language-"]::-webkit-scrollbar-thumb:hover {
+    background: #8be9fd;
+  }
 }
 
-pre[class*="language-"]::-webkit-scrollbar {
-  width: 8px;
-}
+@layer components {
+  /* 인라인 코드 스타일 */
+  .prose :not(pre) > code[class*="language-"] {
+    padding: 0.1em;
+    border-radius: 0.3em;
+    white-space: normal;
+    background: #f1f1f1;
+    color: #333;
+  }
 
-pre[class*="language-"]::-webkit-scrollbar-thumb {
-  background-color: #555;
-  border-radius: 4px;
-}
+  /* PrismJS 토큰 색상 - 라이트 모드 */
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata {
+    color: #6b7280;
+  }
 
-pre[class*="language-"]::-webkit-scrollbar-track {
-  background-color: #333;
-}
+  .token.punctuation {
+    color: #374151;
+  }
 
-pre[class*="language-"] code {
-  padding-left: 0;
+  .token.namespace {
+    opacity: 0.7;
+  }
+
+  .token.property,
+  .token.tag,
+  .token.constant,
+  .token.symbol,
+  .token.deleted {
+    color: #dc2626;
+  }
+
+  .token.boolean,
+  .token.number {
+    color: #7c3aed;
+  }
+
+  .token.selector,
+  .token.attr-name,
+  .token.string,
+  .token.char,
+  .token.builtin,
+  .token.inserted {
+    color: #059669;
+  }
+
+  .token.operator,
+  .token.entity,
+  .token.url,
+  .language-css .token.string,
+  .style .token.string,
+  .token.variable {
+    color: #374151;
+  }
+
+  .token.atrule,
+  .token.attr-value,
+  .token.function,
+  .token.class-name {
+    color: #d97706;
+  }
+
+  .token.keyword {
+    color: #2563eb;
+  }
+
+  .token.regex,
+  .token.important {
+    color: #ea580c;
+  }
+
+  .token.important,
+  .token.bold {
+    font-weight: bold;
+  }
+
+  .token.italic {
+    font-style: italic;
+  }
+
+  .token.entity {
+    cursor: help;
+  }
+
+  /* 다크 모드 토큰 색상 */
+  .dark .token.comment,
+  .dark .token.prolog,
+  .dark .token.doctype,
+  .dark .token.cdata {
+    color: #9ca3af;
+  }
+
+  .dark .token.punctuation {
+    color: #d1d5db;
+  }
+
+  .dark .token.property,
+  .dark .token.tag,
+  .dark .token.constant,
+  .dark .token.symbol,
+  .dark .token.deleted {
+    color: #f87171;
+  }
+
+  .dark .token.boolean,
+  .dark .token.number {
+    color: #a78bfa;
+  }
+
+  .dark .token.selector,
+  .dark .token.attr-name,
+  .dark .token.string,
+  .dark .token.char,
+  .dark .token.builtin,
+  .dark .token.inserted {
+    color: #34d399;
+  }
+
+  .dark .token.operator,
+  .dark .token.entity,
+  .dark .token.url,
+  .dark .language-css .token.string,
+  .dark .style .token.string,
+  .dark .token.variable {
+    color: #d1d5db;
+  }
+
+  .dark .token.atrule,
+  .dark .token.attr-value,
+  .dark .token.function,
+  .dark .token.class-name {
+    color: #fbbf24;
+  }
+
+  .dark .token.keyword {
+    color: #60a5fa;
+  }
+
+  .dark .token.regex,
+  .dark .token.important {
+    color: #fb923c;
+  }
+
+  /* 인라인 코드 스타일 - 라이트 모드 */
+  .prose :not(pre) > code[class*="language-"] {
+    padding: 0.1em 0.3em;
+    border-radius: 0.3em;
+    white-space: normal;
+    background: #f3f4f6;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
+  }
+
+  /* 다크 모드 인라인 코드 */
+  .dark .prose :not(pre) > code[class*="language-"] {
+    background: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+  }
 }
