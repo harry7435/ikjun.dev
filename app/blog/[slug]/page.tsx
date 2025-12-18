@@ -4,7 +4,7 @@ import { getAllPosts, getPostBySlug } from "@/lib/notion";
 import { notFound } from "next/navigation";
 import MarkdownRenderer from "./components/MarkdownRenderer";
 
-export const revalidate = 0;
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
