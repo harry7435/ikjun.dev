@@ -12,9 +12,7 @@ const n2m = new NotionToMarkdown({ notionClient: notion });
 export async function getAllPosts(): Promise<NotionPost[]> {
   const databaseId = process.env.NOTION_DATABASE_ID;
 
-  if (!databaseId) {
-    throw new Error("NOTION_DATABASE_ID is not defined");
-  }
+  if (!databaseId) throw new Error("NOTION_DATABASE_ID is not defined");
 
   const response = await notion.dataSources.query({
     data_source_id: databaseId,
@@ -45,7 +43,6 @@ export async function getAllPosts(): Promise<NotionPost[]> {
 
 export async function getPostBySlug(slug: string): Promise<NotionPost | null> {
   // 모든 포스트를 가져와서 슬러그 매칭
-  // (자동 생성된 슬러그는 DB 쿼리로 찾을 수 없으므로)
   const allPosts = await getAllPosts();
   const decodedSlug = decodeURIComponent(slug);
   return (
@@ -78,13 +75,9 @@ async function getPostFromPage(page: PageObjectResponse): Promise<NotionPost> {
 
   // Extract properties
   const title = properties.Title?.title?.[0]?.plain_text || "Untitled";
-
   const subtitle = properties.Subtitle?.rich_text?.[0]?.plain_text || undefined;
-
   const date = properties.Date?.date?.start || new Date().toISOString();
-
   const tags = properties.Tags?.multi_select?.map((tag) => tag.name) || [];
-
   const category =
     (properties.Category?.select?.name?.toLowerCase() as "posts" | "notes") ||
     "posts";

@@ -1,32 +1,15 @@
-"use client";
+import { getAllPosts } from "@/lib/notion";
+import BlogClient from "./components/BlogClient";
 
-import { compareDesc } from "date-fns";
-import { allPosts, allNotes } from "contentlayer/generated";
-import { useState } from "react";
-import PostCard from "./components/post-card";
-import CategoryFilter from "./components/category-filter";
+export const revalidate = 3600; // Revalidate every hour
 
-type CategoryType = "all" | "posts" | "notes";
-
-export default function BlogPage() {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType>("all");
-
-  // Posts와 Notes를 통합
-  const allContent = [
-    ...allPosts.map((post) => ({ ...post, category: "posts" as const })),
-    ...allNotes.map((note) => ({ ...note, category: "notes" as const })),
-  ].sort((a, b) => compareDesc(new Date(a.date), new Date(b.date)));
-
-  // 카테고리에 따른 필터링
-  const filteredContent =
-    selectedCategory === "all"
-      ? allContent
-      : allContent.filter((item) => item.category === selectedCategory);
+export default async function BlogPage() {
+  const allContent = await getAllPosts();
 
   const categoryStats = {
     all: allContent.length,
-    posts: allPosts.length,
-    notes: allNotes.length,
+    posts: allContent.filter((item) => item.category === "posts").length,
+    notes: allContent.filter((item) => item.category === "notes").length,
   };
 
   return (
@@ -40,31 +23,7 @@ export default function BlogPage() {
             </p>
           </div>
 
-          <CategoryFilter
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-            stats={categoryStats}
-          />
-
-          <div className="flex flex-col gap-y-6">
-            {filteredContent.length > 0 ? (
-              filteredContent.map((item, idx) => (
-                <PostCard
-                  key={`${item.category}-${idx}`}
-                  href={item.url}
-                  title={item.title || "제목 없음"}
-                  postDate={item.date}
-                  subtitle={"subtitle" in item ? item.subtitle : undefined}
-                  category={item.category}
-                  tags={item.tags || []}
-                />
-              ))
-            ) : (
-              <div className="py-12 text-center text-stone-500 dark:text-gray-400">
-                해당 카테고리에 글이 없습니다.
-              </div>
-            )}
-          </div>
+          <BlogClient posts={allContent} stats={categoryStats} />
         </div>
       </div>
     </main>

@@ -1,34 +1,30 @@
 import { format, parseISO } from "date-fns";
-import { allPosts, allNotes } from "contentlayer/generated";
 import Link from "next/link";
-import CodeHighlighter from "./components/code-highlighter";
+import { getAllPosts, getPostBySlug } from "@/lib/notion";
+import { notFound } from "next/navigation";
+import MarkdownRenderer from "./components/MarkdownRenderer";
 
-export const generateStaticParams = async () => [
-  ...allPosts.map((post) => ({
-    slug: post._raw.flattenedPath.replace("posts/", ""),
-  })),
-  ...allNotes.map((note) => ({
-    slug: note._raw.flattenedPath.replace("notes/", ""),
-  })),
-];
+export const revalidate = 3600; // Revalidate every hour
 
-export const generateMetadata = async ({
+export async function generateStaticParams() {
+  const posts = await getAllPosts();
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
+
+export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
-}) => {
+}) {
   const { slug } = await params;
-  const post = allPosts.find(
-    (post) => post._raw.flattenedPath.replace("posts/", "") === slug
-  );
-  const note = allNotes.find(
-    (note) => note._raw.flattenedPath.replace("notes/", "") === slug
-  );
-  const content = post || note;
+  const content = await getPostBySlug(slug);
 
-  if (!content) throw new Error(`Content not found for slug: ${slug}`);
+  if (!content) return { title: "Post Not Found" };
+
   return { title: content.title };
-};
+}
 
 export default async function BlogPostDetailPage({
   params,
@@ -36,18 +32,11 @@ export default async function BlogPostDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = allPosts.find(
-    (post) => post._raw.flattenedPath.replace("posts/", "") === slug
-  );
-  const note = allNotes.find(
-    (note) => note._raw.flattenedPath.replace("notes/", "") === slug
-  );
-  const content = post || note;
+  const postContent = await getPostBySlug(slug);
 
-  if (!content) throw new Error(`Content not found for slug: ${slug}`);
+  if (!postContent) notFound();
 
-  const isPost = !!post;
-  const category = isPost ? "posts" : "notes";
+  const category = postContent.category;
 
   const categoryConfig = {
     posts: {
@@ -84,22 +73,22 @@ export default async function BlogPostDetailPage({
                 {categoryConfig[category].label}
               </span>
               <time className="text-sm text-stone-600 dark:text-gray-400">
-                {format(parseISO(content.date), "LLLL d, yyyy")}
+                {format(parseISO(postContent.date), "LLLL d, yyyy")}
               </time>
             </div>
 
-            <h1 className="mb-3 text-3xl font-bold">{content.title}</h1>
+            <h1 className="mb-3 text-3xl font-bold">{postContent.title}</h1>
 
-            {isPost && post.subtitle && (
+            {postContent.subtitle && (
               <p className="mx-auto max-w-2xl text-lg text-stone-600 dark:text-gray-400">
-                {post.subtitle}
+                {postContent.subtitle}
               </p>
             )}
 
             {/* 태그 */}
-            {content.tags && content.tags.length > 0 && (
+            {postContent.tags && postContent.tags.length > 0 && (
               <div className="mt-4 flex flex-wrap justify-center gap-2">
-                {content.tags.map((tag, index) => (
+                {postContent.tags.map((tag, index) => (
                   <span
                     key={index}
                     className="rounded-full bg-stone-200 px-3 py-1 text-sm text-stone-700 dark:bg-gray-700 dark:text-gray-300"
@@ -113,7 +102,7 @@ export default async function BlogPostDetailPage({
 
           {/* 본문 */}
           <div className="border-t border-stone-200 pt-8 dark:border-gray-700">
-            <CodeHighlighter content={content.body.html} />
+            <MarkdownRenderer content={postContent.content} />
           </div>
 
           {/* 푸터 */}
