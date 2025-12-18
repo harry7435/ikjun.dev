@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getAllPosts, getPostBySlug } from "@/lib/notion";
 import { notFound } from "next/navigation";
 import MarkdownRenderer from "./components/MarkdownRenderer";
+import PostCard from "../components/PostCard";
+import type { NotionPost } from "@/lib/types/notion";
 
 export const revalidate = 3600;
 
@@ -26,6 +28,16 @@ export async function generateMetadata({
   return { title: content.title };
 }
 
+function getRecentPosts(
+  currentPost: NotionPost,
+  allPosts: NotionPost[],
+  limit: number = 3
+): NotionPost[] {
+  return allPosts
+    .filter((post) => post.slug !== currentPost.slug)
+    .slice(0, limit);
+}
+
 export default async function BlogPostDetailPage({
   params,
 }: {
@@ -35,6 +47,10 @@ export default async function BlogPostDetailPage({
   const postContent = await getPostBySlug(slug);
 
   if (!postContent) notFound();
+
+  // 최신 글 가져오기
+  const allPosts = await getAllPosts();
+  const recentPosts = getRecentPosts(postContent, allPosts, 3);
 
   const category = postContent.category;
 
@@ -60,7 +76,7 @@ export default async function BlogPostDetailPage({
               href="/blog"
               className="inline-flex items-center text-sm text-stone-600 transition-colors hover:text-stone-800 dark:text-gray-400 dark:hover:text-gray-200"
             >
-              ← 블로그 목록으로 돌아가기
+              ← 목록으로
             </Link>
           </div>
 
@@ -101,22 +117,30 @@ export default async function BlogPostDetailPage({
           </header>
 
           {/* 본문 */}
-          <div className="border-t border-stone-200 pt-8 dark:border-gray-700">
-            <MarkdownRenderer content={postContent.content} />
-          </div>
-
-          {/* 푸터 */}
-          <footer className="mt-12 border-t border-stone-200 pt-8 dark:border-gray-700">
-            <div className="text-center">
-              <Link
-                href="/blog"
-                className="inline-flex items-center rounded-lg bg-amber-500 px-4 py-2 text-white transition-colors hover:bg-amber-600"
-              >
-                더 많은 글 보기
-              </Link>
-            </div>
-          </footer>
+          <MarkdownRenderer content={postContent.content} />
         </article>
+
+        {/* 최신 글 */}
+        {recentPosts.length > 0 && (
+          <section className="mx-auto mt-16 max-w-4xl">
+            <h2 className="mb-6 text-2xl font-bold text-stone-800 dark:text-gray-200">
+              다른 포스트
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {recentPosts.map((post) => (
+                <PostCard
+                  key={post.slug}
+                  href={post.url}
+                  title={post.title}
+                  postDate={post.date}
+                  subtitle={post.subtitle}
+                  category={post.category}
+                  tags={post.tags}
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );
