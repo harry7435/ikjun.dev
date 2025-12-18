@@ -1,7 +1,7 @@
 import { getAllPosts } from "@/lib/notion";
 import BlogClient from "./components/BlogClient";
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 0;
 
 export default async function BlogPage() {
   const allContent = await getAllPosts();
