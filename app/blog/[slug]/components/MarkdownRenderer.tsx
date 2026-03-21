@@ -11,7 +11,7 @@ interface MarkdownRendererProps {
 export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
     <div
-      className="prose prose-lg prose-stone dark:prose-invert
+      className="prose prose-lg prose-stone mx-auto dark:prose-invert
         prose-headings:scroll-m-20 prose-headings:font-bold
         prose-h1:mb-6 prose-h1:mt-8 prose-h1:text-3xl
         prose-h2:mb-4 prose-h2:mt-8 prose-h2:border-b prose-h2:border-stone-200 prose-h2:pb-2 prose-h2:text-2xl

@@ -6,13 +6,9 @@ export const brandingStatement =
 export const executiveSummary = `
 **팀**과 함께 성장하는 개발자 **조익준**입니다.
 
-UI/UX를 고려한 개발을 중요하게 생각하며, React, Next.js, TypeScript를 중심으로 성능 최적화와 디자인 시스템 구축에 관심이 많습니다.
+1인 체제 운영과 팀 협업을 모두 경험하며 독립적 의사결정과 코드 리뷰 기반 개발을 수행했습니다. Claude Code를 활용해 팀 개발 컨벤션을 확립하고 작업 효율을 높이는 데 관심이 많습니다.
 
 현재는 **유리프트** Product 팀에서 프론트엔드 엔지니어로 **코딩밸리** 서비스를 운영하고 있습니다.
-
-이전에는 **프로그래머스 프론트엔드 데브코스** 교육을 수료하며 3번의 팀 프로젝트에서 팀장 역할을 수행했습니다.
-
-개발자의 커뮤니케이션에 대해 고민하며 "**개발관계론**"이라는 주제로 발표를 해본 경험이 있습니다.
 `;
 
 export const keyTechStack = [
@@ -22,6 +18,7 @@ export const keyTechStack = [
   "firebase",
   "hygraph(graphQL)",
   "tailwindcss",
+  "Mixpanel",
 ];
 
 export const projects = [

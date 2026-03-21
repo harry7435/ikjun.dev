@@ -99,55 +99,86 @@ export default function AboutPage() {
                   </h4>
 
                   <ExperienceSubsection
-                    title="코딩밸리 서비스 웹페이지 랜딩화 및 고도화"
+                    title="코딩밸리 서비스 고도화"
                     isLink
                     href="https://www.codingvalley.com/"
                   >
                     <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
                       <li>
-                        강의 무료체험을 위한 무료체험 페이지 구현으로{" "}
+                        무료체험 페이지 구현으로{" "}
                         <strong>사용자 전환율 25% 향상</strong>
                       </li>
                       <li>
-                        <strong>마케팅 전략 및 기획</strong>에 맞는 신규 페이지
-                        및{" "}
+                        마케팅{" "}
                         <Link
                           target="_blank"
                           rel="noopener noreferrer"
                           href="https://www.codingvalley.com/ldm/7"
                           className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                         >
-                          LDM(홍보) 페이지
+                          LDM 페이지
                           <FaExternalLinkAlt className="ml-1 inline-block size-3" />
                         </Link>{" "}
-                        구현 및 개선
+                        10개 이상 신규 개발 및 A/B 테스트 대응
                       </li>
                       <li>
-                        이미지 및 동영상 최적화를 통한{" "}
-                        <strong>{"LCP 3.71초 > 1.14초 단축"}</strong> 경험
-                      </li>
-                      <li>
-                        기존 웹페이지를 <strong>웹뷰</strong>로 구현하여
-                        네이티브 앱에서도 동일한 서비스 제공
-                      </li>
-                      <li>
-                        <strong>고객 인바운드를 반영</strong>한 코딩밸리 서비스
-                        UI 개선
+                        이미지/영상 최적화를 통한{" "}
+                        <strong>{"LCP 3.71초 → 1.14초 단축"}</strong>
                       </li>
                     </ul>
                   </ExperienceSubsection>
 
-                  <ExperienceSubsection title="코딩밸리 PC 웹앱 전환 프로젝트">
+                  <ExperienceSubsection title="웹뷰 & 웹앱 개발">
                     <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
                       <li>
-                        기존 네이티브 앱 내 강의, 커뮤니티 기능을{" "}
-                        <strong>웹앱</strong>으로 구현
+                        네이티브 앱 내 <strong>웹뷰 랜딩 페이지 최적화</strong>{" "}
+                        및 웹/웹뷰 구분 아키텍처 설계
                       </li>
                       <li>
-                        <strong>크로스 플랫폼</strong> 지원으로 사용자 접근성
-                        확대
+                        네이티브 앱 기능을 <strong>웹앱</strong>으로 전환,{" "}
+                        크로스 플랫폼 사용자 경험 통합
                       </li>
-                      <li>반응형 디자인 적용으로 다양한 디바이스 환경 지원</li>
+                      <li>
+                        가상키보드 표출 시 화면 쉬프트 현상 해결로{" "}
+                        <strong>UX 개선</strong>
+                      </li>
+                    </ul>
+                  </ExperienceSubsection>
+
+                  <ExperienceSubsection title="AI/LLM 기능 개발">
+                    <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
+                      <li>
+                        LLM 실습 코스를 위한{" "}
+                        <strong>스트리밍 응답 UI</strong> 구현 및 최적화
+                      </li>
+                      <li>
+                        신규 백엔드 API 연동 및 실시간 응답 처리 로직 개발
+                      </li>
+                    </ul>
+                  </ExperienceSubsection>
+
+                  <ExperienceSubsection title="데이터 트래킹 & 분석 환경 구축">
+                    <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
+                      <li>
+                        <strong>Mixpanel</strong> 기반 웹/웹앱 전반 사용자 활동
+                        트래킹 환경 구현
+                      </li>
+                      <li>
+                        마케팅 팀에서 활용 가능한 데이터 분석 기반 마련
+                      </li>
+                    </ul>
+                  </ExperienceSubsection>
+
+                  <ExperienceSubsection title="개발 문화 & 프로세스 개선">
+                    <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
+                      <li>
+                        팀원과 <strong>Claude Code</strong>{" "}
+                        커맨드/스킬/에이전트 활용한 개발 컨벤션 확립
+                      </li>
+                      <li>
+                        신규 개발자 온보딩을 위한 AI 도구 활용 가이드 문서화로{" "}
+                        <strong>작업 효율 향상</strong>
+                      </li>
                     </ul>
                   </ExperienceSubsection>
                 </div>
@@ -160,6 +191,7 @@ export default function AboutPage() {
                     "firebase",
                     "hygraph(graphQL)",
                     "playwright",
+                    "Mixpanel",
                     "Vercel",
                   ]}
                 />
