@@ -4,8 +4,6 @@ export const brandingStatement =
   "사용자 경험을 중점적으로 웹페이지 성능을 최적화하고 유연한 소프트 스킬로 팀에 잘 스며드는 프론트엔드 개발자";
 
 export const executiveSummary = `
-**팀**과 함께 성장하는 개발자 **조익준**입니다.
-
 1인 체제 운영과 팀 협업을 모두 경험하며 독립적 의사결정과 코드 리뷰 기반 개발을 수행했습니다. Claude Code를 활용해 팀 개발 컨벤션을 확립하고 작업 효율을 높이는 데 관심이 많습니다.
 
 현재는 **유리프트** Product 팀에서 프론트엔드 엔지니어로 **코딩밸리** 서비스를 운영하고 있습니다.
@@ -19,9 +17,70 @@ export const keyTechStack = [
   "hygraph(graphQL)",
   "tailwindcss",
   "Mixpanel",
+  "Claude Code CLI",
+  "MCP",
 ];
 
 export const projects = [
+  {
+    title: "To Find Crew 🏸",
+    description: "배드민턴 크루 관리 서비스",
+    period: "2025 ~ 현재",
+    links: [
+      { href: "https://to-find-crew.vercel.app/", label: "배포 링크" },
+    ],
+    whyContent:
+      "배드민턴 동호회에서 매번 팀 배분, 코트 배정, 참가자 관리를 수기로 하면서 시간이 낭비되고 형평성 문제가 발생했습니다.",
+    howContent: [
+      "<strong>크루 시스템</strong>: 관심사 기반 크루 생성, 역할(OWNER/ADMIN/MEMBER) 기반 권한 관리",
+      "<strong>게임 매니저</strong>: 선수 등록 + 실력별 랜덤 팀 뽑기 + 코트 배정 자동화",
+      "<strong>게스트 참가 지원</strong>: 회원가입 없이 이름/성별/실력으로 즉시 참여 가능",
+      "<strong>소셜 로그인 & PWA</strong>: Google, Kakao 인증 지원 및 모바일 앱 설치 지원",
+    ],
+    resultContent: [
+      "<strong>실제 배드민턴 동호회에서 활용 중</strong>",
+      "<strong>Supabase RLS</strong> 기반 역할별 접근 제어로 데이터 보안 확보",
+    ],
+    techStack: [
+      "Next.js 15",
+      "TypeScript",
+      "Supabase",
+      "Tailwind CSS v4",
+      "shadcn/ui",
+      "React Hook Form",
+      "Zod",
+      "PWA",
+    ],
+  },
+  {
+    title: "우리집 가계부",
+    description: "가족 공유 가계부 웹 앱",
+    period: "2025 ~ 현재",
+    links: [
+      { href: "https://2k-jii-money.vercel.app/", label: "배포 링크" },
+    ],
+    whyContent:
+      "기존 가계부 앱들이 개인 중심이라 가족 단위로 수입/지출을 함께 관리하고 공유하기 어려웠습니다.",
+    howContent: [
+      "<strong>가족 공유 시스템</strong>: 가족 생성 및 초대 코드/QR 기반 참여로 가족 구성원 간 실시간 가계부 공유",
+      "<strong>3단계 카테고리 구조</strong>: 대분류/중분류/소분류로 체계적인 수입·지출 분류",
+      "<strong>예산 관리</strong>: 월별 예산 설정 및 진행률 시각화",
+      "<strong>대시보드</strong>: recharts 기반 월별 수입/지출 통계 차트",
+    ],
+    resultContent: [
+      "<strong>실제 가족과 함께 일상적으로 사용 중</strong>인 서비스",
+      "Zustand persist + TanStack React Query로 <strong>오프라인 대응 및 데이터 캐싱 최적화</strong>",
+    ],
+    techStack: [
+      "Next.js 16",
+      "TypeScript",
+      "Supabase",
+      "Tailwind CSS v4",
+      "Zustand",
+      "TanStack React Query",
+      "recharts",
+    ],
+  },
   {
     title: "Choice Eat",
     description: "위치 기반 메뉴 선택 서비스",
@@ -46,70 +105,6 @@ export const projects = [
       "Geolocation API",
       "Naver Map API",
       "TailwindCSS",
-    ],
-  },
-  {
-    title: "AlgoBaro",
-    description: "코딩 테스트 학습 플랫폼",
-    period: "2023.12 ~ 2024.02",
-    links: [
-      { href: "https://algobaro.vercel.app/", label: "배포 링크" },
-      { href: "https://github.com/1e5i-Shark/algobaro-fe", label: "GitHub" },
-    ],
-    whyContent:
-      "기존 코딩 테스트 플랫폼들이 개별 학습에만 집중하여, 팀원들과 함께 문제를 해결하고 코드 리뷰를 통해 학습하는 환경이 부족",
-    howContent: [
-      "<strong>실시간 협업</strong>: WebSocket 기반 그룹 스터디 채팅 시스템 구현",
-      "<strong>코드 리뷰</strong>: 팀원 간 코드 공유 및 피드백 기능 개발",
-      "<strong>개발 효율성</strong>: 공용 API 인스턴스로 팀 개발 속도 40% 향상",
-      "<strong>사용자 경험</strong>: Code Mirror 기반 실시간 코드 에디터 구현",
-    ],
-    resultContent: [
-      "<strong>팀 개발 효율성 40% 향상</strong> (공용 API 설정으로)",
-      "<strong>실시간 협업 기능</strong>으로 사용자 참여도 증대",
-      "<strong>반응형 디자인</strong>으로 모바일 접근성 100% 지원",
-    ],
-    techStack: [
-      "React",
-      "TypeScript",
-      "React Query",
-      "WebSocket",
-      "Code Mirror",
-      "Zustand",
-      "Styled-Components",
-    ],
-  },
-  {
-    title: "Styled",
-    description: "패션 SNS 서비스",
-    period: "2023.10 ~ 2023.12",
-    links: [
-      { href: "https://styled-rho.vercel.app/", label: "배포 링크" },
-      {
-        href: "https://github.com/prgrms-fe-devcourse/FEDC5_STYLED_sehee",
-        label: "GitHub",
-      },
-    ],
-    whyContent:
-      "기존 패션 플랫폼들의 느린 로딩 속도와 단조로운 UI로 인해 사용자 이탈률이 높았습니다. 특히 이미지 중심의 SNS에서 최적화된 사용자 경험이 필요",
-    howContent: [
-      "<strong>성능 최적화</strong>: React Query 캐싱으로 데이터 로딩 최적화",
-      "<strong>UX 개선</strong>: 스켈레톤 UI와 무한 스크롤로 매끄러운 경험 제공",
-      "<strong>이미지 최적화</strong>: 지연 로딩과 미리보기로 로딩 속도 개선",
-      "<strong>반응형 설계</strong>: 모바일 퍼스트 접근으로 다양한 기기 지원",
-    ],
-    resultContent: [
-      "<strong>페이지 로딩 속도 60% 향상</strong> (React Query 캐싱)",
-      "<strong>사용자 경험 개선</strong>으로 체류 시간 증가",
-      "<strong>모바일 최적화</strong>로 크로스 플랫폼 사용성 확보",
-    ],
-    techStack: [
-      "React",
-      "TypeScript",
-      "React Query",
-      "Styled-Components",
-      "Zustand",
-      "Infinite Scroll",
     ],
   },
 ];

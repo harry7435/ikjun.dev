@@ -31,26 +31,16 @@ export default function AboutPage() {
       <ScrollProgressBar />
 
       <div className="container mx-auto px-6 py-12 pt-24">
-        {/* 히어로 섹션 - 브랜딩 문구 */}
+        {/* 히어로 섹션 - 브랜딩 + 소개 */}
         <section className="mb-12 w-full">
           <h1 className="mb-4 text-2xl font-bold text-gray-700 dark:text-white md:text-3xl">
             안녕하세요! 조익준입니다.
           </h1>
           <AnimatedSection>
-            {/* 한 줄 브랜딩 - 타이핑 효과 */}
-            <div className="mx-auto mb-6 rounded-lg bg-gradient-to-r from-amber-50/70 to-orange-50/70 p-6 shadow-sm dark:from-blue-900/20 dark:to-indigo-900/20">
-              <p className="text-lg font-semibold text-gray-700 dark:text-white md:text-xl">
+            <div className="mx-auto rounded-lg bg-gradient-to-r from-amber-50/70 to-orange-50/70 p-6 shadow-sm dark:from-blue-900/20 dark:to-indigo-900/20">
+              <p className="mb-4 text-lg font-semibold text-gray-700 dark:text-white md:text-xl">
                 📌 <TypingText text={brandingStatement} />
               </p>
-            </div>
-          </AnimatedSection>
-        </section>
-
-        {/* 메인 섹션들 */}
-        <section className="mb-8 flex flex-col gap-8">
-          {/* Executive Summary */}
-          <AnimatedSection delay={0.1}>
-            <SectionCard title="Executive Summary" icon="💡">
               <div className="text-gray-700 dark:text-gray-300">
                 <ReactMarkdown
                   components={{
@@ -66,27 +56,15 @@ export default function AboutPage() {
                   {executiveSummary}
                 </ReactMarkdown>
               </div>
-            </SectionCard>
+            </div>
           </AnimatedSection>
+        </section>
 
-          {/* 기술 스택 */}
-          <AnimatedSection delay={0.2}>
-            <SectionCard title="Key Tech Stack" icon="🛠">
-              <div className="flex flex-wrap gap-3">
-                {keyTechStack.map((tech, index) => (
-                  <span
-                    key={index}
-                    className="rounded-lg bg-stone-200/60 px-3 py-1.5 text-stone-700 dark:bg-gray-700 dark:text-gray-300"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </SectionCard>
-          </AnimatedSection>
+        {/* 메인 섹션들 */}
+        <section className="mb-8 flex flex-col gap-8">
 
           {/* 경력 & 교육 */}
-          <AnimatedSection delay={0.3}>
+          <AnimatedSection delay={0.2}>
             <SectionCard title="경력 & 교육" icon="💼">
               {/* 유리프트 경험 */}
               <ExperienceCard
@@ -181,6 +159,33 @@ export default function AboutPage() {
                       </li>
                     </ul>
                   </ExperienceSubsection>
+
+                  <ExperienceSubsection title="AI 코딩 도구(Claude Code) 개발 환경 구축">
+                    <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300">
+                      <li>
+                        모놀리식 CLAUDE.md →{" "}
+                        <strong>모듈형 13개 서브 문서</strong> 시스템 재설계로
+                        토큰 소비 70% 절감
+                      </li>
+                      <li>
+                        PreToolUse 훅 기반{" "}
+                        <strong>민감정보 유출 방지 보안 게이트</strong> 구축
+                      </li>
+                      <li>
+                        <strong>빌더/리뷰어 2-에이전트 분리 아키텍처</strong>{" "}
+                        설계로 코드 품질 구조적 보장
+                      </li>
+                      <li>
+                        4개 커스텀 스킬 +{" "}
+                        <strong>14개+ 슬래시 커맨드</strong> 구축 (PR, CMS,
+                        디자인, SEO 워크플로우 자동화)
+                      </li>
+                      <li>
+                        <strong>Figma MCP, Hygraph MCP</strong> 연동으로
+                        디자인·CMS 데이터 AI 직접 접근 환경 구축
+                      </li>
+                    </ul>
+                  </ExperienceSubsection>
                 </div>
 
                 <TechStack
@@ -193,6 +198,8 @@ export default function AboutPage() {
                     "playwright",
                     "Mixpanel",
                     "Vercel",
+                    "Claude Code CLI",
+                    "MCP",
                   ]}
                 />
               </ExperienceCard>
@@ -237,11 +244,27 @@ export default function AboutPage() {
           </AnimatedSection>
 
           {/* 핵심 프로젝트 */}
-          <AnimatedSection delay={0.4}>
+          <AnimatedSection delay={0.3}>
             <SectionCard title="핵심 프로젝트" icon="🚀">
               <div className="flex flex-col gap-12">
                 {projects.map((project, index) => (
                   <ProjectCard key={index} {...project} />
+                ))}
+              </div>
+            </SectionCard>
+          </AnimatedSection>
+
+          {/* 기술 스택 */}
+          <AnimatedSection delay={0.4}>
+            <SectionCard title="Key Tech Stack" icon="🛠">
+              <div className="flex flex-wrap gap-3">
+                {keyTechStack.map((tech, index) => (
+                  <span
+                    key={index}
+                    className="rounded-lg bg-stone-200/60 px-3 py-1.5 text-stone-700 dark:bg-gray-700 dark:text-gray-300"
+                  >
+                    {tech}
+                  </span>
                 ))}
               </div>
             </SectionCard>
