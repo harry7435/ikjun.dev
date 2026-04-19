@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* /about 마우스 그라데이션 색 (테마별) */
+:root {
+  --about-gradient-color: rgba(217, 119, 6, 0.1);
+}
+.dark {
+  --about-gradient-color: rgba(251, 191, 36, 0.07);
+}
+
 /* 레이어를 사용하여 Tailwind와 조화롭게 작업 */
 @layer utilities {
   .code-block-scroll {
