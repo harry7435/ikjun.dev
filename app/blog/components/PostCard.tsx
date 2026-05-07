@@ -8,6 +8,7 @@ interface PostCardProps {
   subtitle?: string;
   category?: "posts" | "notes";
   tags?: string[];
+  onClick?: () => void;
 }
 
 export default function PostCard({
@@ -17,6 +18,7 @@ export default function PostCard({
   subtitle,
   category,
   tags = [],
+  onClick,
 }: PostCardProps) {
   const categoryConfig = {
     posts: {
@@ -31,7 +33,7 @@ export default function PostCard({
   };
 
   return (
-    <Link href={href}>
+    <Link href={href} onClick={onClick}>
       <article className="group flex flex-col rounded-lg border border-stone-300/40 bg-stone-200/60 p-6 shadow-sm backdrop-blur-sm transition-[transform,shadow] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
         {/* 카테고리와 날짜 */}
         <div className="mb-3 flex items-center justify-between">

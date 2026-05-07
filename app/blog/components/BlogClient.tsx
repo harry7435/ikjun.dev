@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { NotionPost } from "@/lib/types/notion";
 import PostCard from "./PostCard";
 import CategoryFilter from "./CategoryFilter";
+import { track } from "@/app/components/analytics/mixpanel";
 
 type CategoryType = "all" | "posts" | "notes";
 
@@ -43,6 +44,13 @@ export default function BlogClient({ posts, stats }: BlogClientProps) {
               subtitle={item.subtitle}
               category={item.category}
               tags={item.tags || []}
+              onClick={() =>
+                track("blog_post_click", {
+                  slug: item.url.split("/").pop() ?? item.url,
+                  title: item.title || "제목 없음",
+                  category: item.category,
+                })
+              }
             />
           ))
         ) : (

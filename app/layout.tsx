@@ -4,6 +4,8 @@ import { ThemeProvider } from "next-themes";
 import Header from "./components/header";
 import Footer from "./components/footer";
 import { Analytics } from "@vercel/analytics/next";
+import ClarityScript from "./components/analytics/ClarityScript";
+import MixpanelProvider from "./components/analytics/MixpanelProvider";
 
 export const metadata: Metadata = {
   title: "ikjun.dev",
@@ -50,7 +52,14 @@ export default function RootLayout({
           {children}
           <Footer />
         </ThemeProvider>
-        {process.env.NODE_ENV === "production" && <Analytics />}
+
+        {process.env.NODE_ENV === "production" && (
+          <>
+            <Analytics />
+            <ClarityScript />
+            <MixpanelProvider />
+          </>
+        )}
       </body>
     </html>
   );

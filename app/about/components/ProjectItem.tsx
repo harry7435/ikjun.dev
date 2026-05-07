@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { FaExternalLinkAlt } from "react-icons/fa";
 import type { Project } from "../data/about-data";
+import TrackedExternalLink from "@/app/components/analytics/TrackedExternalLink";
 
 interface Props {
   project: Project;
@@ -29,15 +30,15 @@ export default function ProjectItem({ project }: Props) {
       <div className={hasImage ? "sm:col-span-8" : "sm:col-span-12"}>
         <h3 className="text-base font-semibold text-gray-900 transition-colors group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300">
           {primaryLink ? (
-            <a
+            <TrackedExternalLink
               href={primaryLink.href}
-              target="_blank"
-              rel="noopener noreferrer"
+              label={project.title}
+              surface="about_project"
               className="inline-flex items-center gap-1.5"
             >
               {project.title}
               <FaExternalLinkAlt className="size-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </a>
+            </TrackedExternalLink>
           ) : (
             project.title
           )}

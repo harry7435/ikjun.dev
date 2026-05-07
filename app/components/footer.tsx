@@ -1,3 +1,11 @@
+import TrackedExternalLink from "./analytics/TrackedExternalLink";
+
+const SOCIAL_LINKS = [
+  { label: "GitHub", href: "https://github.com/harry7435" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/ik-jun-cho-998292212/" },
+  { label: "Velog", href: "https://velog.io/@harry7435" },
+] as const;
+
 export default function Footer() {
   return (
     <footer className="border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
@@ -7,30 +15,17 @@ export default function Footer() {
             © 2025 All Right ikjun.dev
           </p>
           <div className="flex space-x-5">
-            <a
-              href="https://github.com/harry7435"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400"
-            >
-              GitHub
-            </a>
-            <a
-              href="https://www.linkedin.com/in/ik-jun-cho-998292212/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400"
-            >
-              LinkedIn
-            </a>
-            <a
-              href="https://velog.io/@harry7435"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400"
-            >
-              Velog
-            </a>
+            {SOCIAL_LINKS.map((link) => (
+              <TrackedExternalLink
+                key={link.label}
+                href={link.href}
+                label={link.label}
+                surface="footer_social"
+                className="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400"
+              >
+                {link.label}
+              </TrackedExternalLink>
+            ))}
           </div>
         </div>
       </div>
