@@ -3,6 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import SectionHeading from "./SectionHeading";
 import { TypingText } from "./TypingText";
+import MetricsBand from "./MetricsBand";
 import { brandingStatement, shortBio } from "../data/about-data";
 
 export default function AboutSection() {
@@ -13,6 +14,8 @@ export default function AboutSection() {
       <p className="mb-8 text-sm font-medium leading-relaxed text-amber-700 dark:text-amber-300">
         <TypingText text={brandingStatement} />
       </p>
+
+      <MetricsBand />
 
       <div className="space-y-4 text-base leading-7 text-gray-700 dark:text-gray-300">
         {shortBio.map((paragraph, i) => (

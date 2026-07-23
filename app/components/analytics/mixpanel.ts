@@ -24,7 +24,11 @@ export type AnalyticsEvent =
       props: {
         href: string;
         label: string;
-        surface: "about_project" | "footer_social" | "sidebar_social";
+        surface:
+          | "about_project"
+          | "about_project_detail"
+          | "footer_social"
+          | "sidebar_social";
       };
     }
   | {

@@ -1,19 +1,39 @@
 // About 페이지 상수 및 데이터
 
 export const brandingStatement =
-  "사용자 경험을 중점적으로 웹페이지 성능을 최적화하고 유연한 소프트 스킬로 팀에 잘 스며드는 프론트엔드 개발자";
+  "사용자 경험 중심의 성능 최적화와 빠른 딜리버리를 강점으로, Claude Code로 팀 개발 효율까지 끌어올리는 프론트엔드 개발자";
 
 export const shortBio = [
-  "현재 **유리프트 Product 팀**에서 [코딩밸리](https://www.codingvalley.com/)의 웹·웹뷰·웹앱을 운영하며, 전환율과 LCP 같은 지표를 코드로 움직이는 일을 좋아합니다.",
-  "1인 운영과 팀 협업을 오가며 독립적인 의사결정과 코드 리뷰 기반 개발을 익혔고, 최근에는 **Claude Code와 MCP**로 팀의 개발 컨벤션·온보딩·보안 게이트를 자동화하는 일에 몰두하고 있습니다.",
+  "**유리프트 Product 팀**에서 [코딩밸리](https://www.codingvalley.com/)의 고객용 웹·모바일 웹앱·운영 어드민 3개 서피스를 개발·운영하며, 전환율과 LCP 같은 지표를 코드로 움직이는 일을 해왔습니다.",
+  "2인 팀과 1인 체제를 오가며 독립적인 의사결정과 코드 리뷰 기반 개발을 익혔고, **Claude Code와 MCP**로 팀의 개발 컨벤션·온보딩·보안 게이트를 자동화하는 데 특히 집중했습니다.",
 ];
 
 // 레거시 호환용. 새 페이지에서는 shortBio를 사용.
 export const executiveSummary = `
 1인 체제 운영과 팀 협업을 모두 경험하며 독립적 의사결정과 코드 리뷰 기반 개발을 수행했습니다. Claude Code를 활용해 팀 개발 컨벤션을 확립하고 작업 효율을 높이는 데 관심이 많습니다.
 
-현재는 **유리프트** Product 팀에서 프론트엔드 엔지니어로 **코딩밸리** 서비스를 운영하고 있습니다.
+**유리프트** Product 팀에서 프론트엔드 엔지니어로 **코딩밸리** 서비스를 개발·운영했습니다.
 `;
+
+// About 히어로 지표 (스크롤 진입 시 카운트업/바 애니메이션)
+export interface Metric {
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  label: string;
+  /** 바 채움 비율 (0~1) */
+  bar: number;
+}
+
+// 성능 지표 (Lighthouse 모바일 5회 측정 평균). bar = 개선폭 비율.
+export const metrics: Metric[] = [
+  { value: 32.8, suffix: "%", decimals: 1, label: "LCP 개선", bar: 0.328 },
+  { value: 37.8, suffix: "%", decimals: 1, label: "FCP 개선", bar: 0.378 },
+  { value: 55.2, suffix: "%", decimals: 1, label: "TBT 개선", bar: 0.552 },
+];
+
+export const metricsCaption = "Lighthouse 모바일 5회 측정 평균";
 
 export const keyTechStack = [
   "Next.js",
@@ -23,6 +43,7 @@ export const keyTechStack = [
   "hygraph(graphQL)",
   "tailwindcss",
   "Mixpanel",
+  "Sentry",
   "Claude Code CLI",
   "MCP",
 ];
@@ -45,65 +66,61 @@ export const experiences: Experience[] = [
   {
     company: "유리프트 Product 팀",
     role: "Frontend Engineer",
-    period: "2024.07 — 현재",
+    period: "2024.07 — 2026.07",
     subsections: [
       {
-        title: "코딩밸리 서비스 고도화",
+        title: "서비스 고도화 & 성능 최적화",
         link: { href: "https://www.codingvalley.com/", label: "코딩밸리" },
         bullets: [
-          "무료체험 페이지 구현으로 <strong>사용자 전환율 25% 향상</strong>",
-          '마케팅 <a href="https://www.codingvalley.com/ldm/7" target="_blank" rel="noopener noreferrer" class="underline decoration-amber-500/60 underline-offset-2 hover:text-amber-600 dark:hover:text-amber-400">LDM 페이지</a> 10개 이상 신규 개발 및 A/B 테스트 대응',
-          "이미지/영상 최적화를 통한 <strong>LCP 3.71초 → 1.14초 단축</strong>",
+          "코딩밸리의 <strong>고객용 웹·모바일 웹앱·운영 어드민 3개 서피스</strong>를 동시 개발·운영 (2인 팀 → 1인 체제 6개월 → 2인 팀)",
+          "이미지/영상 최적화 및 인증·렌더링 병렬화로 <strong>LCP 32.8%·FCP 37.8%·TBT 55.2% 개선</strong> (Lighthouse 측정)",
+          "결제 UX 개선(이탈 방지 모달, 쿠폰 상태 중앙관리, 비로그인 쿠폰 플로우) 구현",
+          '마케팅 <a href="https://www.codingvalley.com/ldm/7" target="_blank" rel="noopener noreferrer" class="underline decoration-amber-500/60 underline-offset-2 hover:text-amber-600 dark:hover:text-amber-400">LDM 페이지</a> 10개 이상 신규 개발',
         ],
       },
       {
-        title: "웹뷰 & 웹앱 개발",
+        title: "웹-웹앱-웹뷰 하이브리드 아키텍처",
         bullets: [
-          "네이티브 앱 내 <strong>웹뷰 랜딩 페이지 최적화</strong> 및 웹/웹뷰 구분 아키텍처 설계",
-          "네이티브 앱 기능을 <strong>웹앱</strong>으로 전환, 크로스 플랫폼 사용자 경험 통합",
-          "가상키보드 표출 시 화면 쉬프트 현상 해결로 <strong>UX 개선</strong>",
+          "웹↔웹앱 <strong>크로스도메인 인증</strong>: 쿠키 의존을 제거하고 쿼리스트링 토큰 전달로 계정 불일치·잔존 이슈 해소",
+          "앱↔웹뷰: 쿠키 <strong>SameSite=Lax</strong> 기반 인증 연동 및 <strong>WebView 페이지 6종</strong> 구축 (코스 상세·멤버십·결제내역 등)",
+          "Flutter 앱 전용 이벤트 브릿지(헤더 타이틀 변경, 네이티브 비디오 플레이어 연동) 구현",
         ],
       },
       {
-        title: "AI/LLM 기능 개발",
+        title: "AI/LLM 실습 시스템 구축",
         bullets: [
-          "LLM 실습 코스를 위한 <strong>스트리밍 응답 UI</strong> 구현 및 최적화",
-          "신규 백엔드 API 연동 및 실시간 응답 처리 로직 개발",
+          "백엔드 SSE 응답을 실시간 렌더링하는 <strong>스트리밍 응답 UI</strong> 구현",
+          "visualViewport API 기반 모바일 가상키보드 대응 (iOS/Android)",
+          "텍스트 → 모바일 최적화 → 멀티모달 → 이미지 생성까지 <strong>4단계 고도화</strong>",
         ],
       },
       {
-        title: "데이터 트래킹 & 분석 환경 구축",
+        title: "광고 트래킹 & 개발 문화",
         bullets: [
-          "<strong>Mixpanel</strong> 기반 웹/웹앱 전반 사용자 활동 트래킹 환경 구현",
-          "마케팅 팀에서 활용 가능한 데이터 분석 기반 마련",
+          "<strong>Mixpanel</strong> 트래킹 인프라 신규 구축 후 4차 고도화 (기본 이벤트 → UTM → PV → 쿠폰 추적), SPA 라우팅 대응",
+          "광고 채널별 ROI 및 무료체험 → 결제 <strong>퍼널 추적</strong> 기반 마련",
         ],
       },
       {
-        title: "개발 문화 & 프로세스 개선",
+        title: "Claude Code 개발 환경 구축",
         bullets: [
-          "팀원과 <strong>Claude Code</strong> 커맨드/스킬/에이전트 활용한 개발 컨벤션 확립",
-          "신규 개발자 온보딩을 위한 AI 도구 활용 가이드 문서화로 <strong>작업 효율 향상</strong>",
-        ],
-      },
-      {
-        title: "AI 코딩 도구(Claude Code) 개발 환경 구축",
-        bullets: [
-          "모놀리식 CLAUDE.md → <strong>모듈형 13개 서브 문서</strong> 시스템 재설계로 토큰 소비 70% 절감",
+          "모놀리식 컨텍스트 문서 → <strong>인덱스 + 13개 서브 문서</strong> 모듈화로 토큰 소비 절감",
           "PreToolUse 훅 기반 <strong>민감정보 유출 방지 보안 게이트</strong> 구축",
-          "<strong>빌더/리뷰어 2-에이전트 분리 아키텍처</strong> 설계로 코드 품질 구조적 보장",
-          "4개 커스텀 스킬 + <strong>14개+ 슬래시 커맨드</strong> 구축 (PR, CMS, 디자인, SEO 워크플로우 자동화)",
-          "<strong>Figma MCP, Hygraph MCP</strong> 연동으로 디자인·CMS 데이터 AI 직접 접근 환경 구축",
+          "<strong>빌더/리뷰어 2-에이전트 아키텍처</strong>로 자기 확인 편향 방지",
+          "<strong>커스텀 커맨드 14개+</strong> 및 <strong>Figma·Hygraph MCP</strong> 연동으로 팀 개발 컨벤션 확립",
         ],
       },
     ],
     techStack: [
       "Next.js",
       "TypeScript",
+      "Zustand",
       "tailwindcss",
       "firebase",
       "hygraph(graphQL)",
-      "playwright",
       "Mixpanel",
+      "Sentry",
+      "playwright",
       "Vercel",
       "Claude Code CLI",
       "MCP",

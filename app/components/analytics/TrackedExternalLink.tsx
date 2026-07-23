@@ -3,7 +3,11 @@
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { track } from "./mixpanel";
 
-type Surface = "about_project" | "footer_social" | "sidebar_social";
+type Surface =
+  | "about_project"
+  | "about_project_detail"
+  | "footer_social"
+  | "sidebar_social";
 
 interface Props extends AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
