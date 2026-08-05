@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import SectionHeading from "./SectionHeading";
 import ProjectItem from "./ProjectItem";
 import ProjectDetailOverlay, { type OverlayState } from "./ProjectDetailOverlay";
-import { projects, type Project } from "../data/about-data";
+import { projects } from "../data/about-data";
 
 export default function ProjectsSection() {
   const [overlay, setOverlay] = useState<OverlayState | null>(null);
+  // 열 때마다 새 id를 부여해 오버레이가 항상 새 엘리먼트로 마운트되게 한다.
+  const openSeq = useRef(0);
 
-  const open = (project: Project, origin: { x: number; y: number }) => {
-    setOverlay({ project, origin });
+  const open = (next: Omit<OverlayState, "id">) => {
+    openSeq.current += 1;
+    setOverlay({ ...next, id: openSeq.current });
   };
 
   return (

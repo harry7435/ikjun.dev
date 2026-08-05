@@ -8,21 +8,27 @@ import HoverTag from "./effects/HoverTag";
 
 interface Props {
   project: Project;
-  onOpen: (project: Project, origin: { x: number; y: number }) => void;
+  onOpen: (state: { project: Project; origin: { x: number; y: number } }) => void;
 }
 
 export default function ProjectItem({ project, onOpen }: Props) {
   const hasImage = Boolean(project.image);
 
+  // 원형 리빌은 클릭 지점에서 퍼진다. clientX/Y는 뷰포트 좌표라
+  // 오버레이의 clip-path 좌표계와 그대로 맞는다.
   const openFromEvent = (
     e: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>
   ) => {
     if ("clientX" in e && e.clientX !== 0) {
-      onOpen(project, { x: e.clientX, y: e.clientY });
+      onOpen({ project, origin: { x: e.clientX, y: e.clientY } });
       return;
     }
+    // 키보드로 열 때는 클릭 좌표가 없으니 카드 중심에서 퍼지게 한다.
     const rect = e.currentTarget.getBoundingClientRect();
-    onOpen(project, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
+    onOpen({
+      project,
+      origin: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
