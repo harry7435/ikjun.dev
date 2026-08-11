@@ -169,7 +169,10 @@ export const projects: Project[] = [
     description: "배드민턴 크루 관리 서비스",
     period: "2025 — 현재",
     image: undefined,
-    links: [{ href: "https://to-find-crew.vercel.app/", label: "Live" }],
+    links: [
+      { href: "https://to-find-crew.vercel.app/", label: "Live" },
+      { href: "https://github.com/harry7435/to-find-crew", label: "GitHub" },
+    ],
     whyContent:
       "배드민턴 동호회에서 매번 팀 배분, 코트 배정, 참가자 관리를 수기로 하면서 시간이 낭비되고 형평성 문제가 발생했습니다.",
     howContent: [
