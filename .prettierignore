@@ -1,0 +1,14 @@
+# 빌드 산출물 / 의존성
+.next/
+node_modules/
+public/
+
+# 락파일은 도구가 생성하므로 포맷하지 않는다
+pnpm-lock.yaml
+package-lock.json
+
+# 도구가 관리하는 로컬 설정
+.claude/
+
+# next build 가 자동 생성/수정하므로 prettier 대상에서 제외
+tsconfig.json
