@@ -33,8 +33,8 @@ export default function PostCard({
   };
 
   return (
-    <Link href={href} onClick={onClick}>
-      <article className="group flex flex-col rounded-lg border border-stone-300/40 bg-stone-200/60 p-6 shadow-sm backdrop-blur-sm transition-[transform,shadow] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
+    <Link href={href} onClick={onClick} className="block h-full">
+      <article className="group flex h-full flex-col rounded-lg border border-stone-300/40 bg-stone-200/60 p-6 shadow-sm backdrop-blur-sm transition-[transform,shadow] hover:translate-y-[-2px] hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/30 dark:hover:shadow-lg dark:hover:shadow-gray-700/30">
         {/* 카테고리와 날짜 */}
         <div className="mb-3 flex items-center justify-between">
           {category && (

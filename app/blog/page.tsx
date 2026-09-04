@@ -1,10 +1,10 @@
-import { getAllPosts } from "@/lib/notion";
+import { getAllPostsMeta } from "@/lib/notion";
 import BlogClient from "./components/BlogClient";
 
 export const revalidate = 3600;
 
 export default async function BlogPage() {
-  const allContent = await getAllPosts();
+  const allContent = await getAllPostsMeta();
 
   const categoryStats = {
     all: allContent.length,

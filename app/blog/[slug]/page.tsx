@@ -1,15 +1,15 @@
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
-import { getAllPosts, getPostBySlug } from "@/lib/notion";
+import { getAllPostsMeta, getPostBySlug } from "@/lib/notion";
 import { notFound } from "next/navigation";
 import MarkdownRenderer from "./components/MarkdownRenderer";
 import PostCard from "../components/PostCard";
-import type { NotionPost } from "@/lib/types/notion";
+import type { NotionPost, NotionPostMeta } from "@/lib/types/notion";
 
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const posts = await getAllPosts();
+  const posts = await getAllPostsMeta();
   return posts.map((post) => ({
     slug: post.slug,
   }));
@@ -30,9 +30,9 @@ export async function generateMetadata({
 
 function getRecentPosts(
   currentPost: NotionPost,
-  allPosts: NotionPost[],
+  allPosts: NotionPostMeta[],
   limit: number = 3
-): NotionPost[] {
+): NotionPostMeta[] {
   return allPosts
     .filter((post) => post.slug !== currentPost.slug)
     .slice(0, limit);
@@ -49,7 +49,7 @@ export default async function BlogPostDetailPage({
   if (!postContent) notFound();
 
   // 최신 글 가져오기
-  const allPosts = await getAllPosts();
+  const allPosts = await getAllPostsMeta();
   const recentPosts = getRecentPosts(postContent, allPosts, 3);
 
   const category = postContent.category;
@@ -69,7 +69,7 @@ export default async function BlogPostDetailPage({
   return (
     <main className="min-h-screen bg-stone-100 text-stone-700 dark:bg-gray-900 dark:text-white">
       <div className="container mx-auto px-6 py-12 pt-16">
-        <article className="mx-auto max-w-4xl py-8">
+        <article className="mx-auto max-w-3xl py-8">
           {/* 뒤로가기 버튼 */}
           <div className="mb-6">
             <Link
@@ -122,7 +122,7 @@ export default async function BlogPostDetailPage({
 
         {/* 최신 글 */}
         {recentPosts.length > 0 && (
-          <section className="mx-auto mt-16 max-w-4xl">
+          <section className="mx-auto mt-16 max-w-3xl">
             <h2 className="mb-6 text-2xl font-bold text-stone-800 dark:text-gray-200">
               다른 포스트
             </h2>

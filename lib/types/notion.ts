@@ -1,4 +1,5 @@
-export interface NotionPost {
+/** 목록/카드 렌더에 필요한 메타데이터. 본문 마크다운을 포함하지 않는다. */
+export interface NotionPostMeta {
   id: string;
   title: string;
   subtitle?: string;
@@ -6,8 +7,12 @@ export interface NotionPost {
   tags: string[];
   category: "posts" | "notes";
   url: string;
-  content: string;
   slug: string;
+}
+
+/** 상세 페이지용. 메타데이터 + 본문 마크다운. */
+export interface NotionPost extends NotionPostMeta {
+  content: string;
 }
 
 export interface NotionDatabaseProperties {

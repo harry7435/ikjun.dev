@@ -1,7 +1,12 @@
+import { cache } from "react";
 import { Client } from "@notionhq/client";
 import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { NotionToMarkdown } from "notion-to-md";
-import type { NotionPost, NotionDatabaseProperties } from "./types/notion";
+import type {
+  NotionPost,
+  NotionPostMeta,
+  NotionDatabaseProperties,
+} from "./types/notion";
 
 const notion = new Client({
   auth: process.env.NOTION_TOKEN,
@@ -9,7 +14,11 @@ const notion = new Client({
 
 const n2m = new NotionToMarkdown({ notionClient: notion });
 
-export async function getAllPosts(): Promise<NotionPost[]> {
+/**
+ * Published 페이지 목록을 Notion에서 가져온다.
+ * 렌더 패스 단위로 캐싱되어, 같은 요청 안에서는 몇 번을 불러도 Notion 쿼리는 1회다.
+ */
+const fetchPublishedPages = cache(async (): Promise<PageObjectResponse[]> => {
   const databaseId = process.env.NOTION_DATABASE_ID;
 
   if (!databaseId) throw new Error("NOTION_DATABASE_ID is not defined");
@@ -30,29 +39,43 @@ export async function getAllPosts(): Promise<NotionPost[]> {
     ],
   });
 
-  const posts = await Promise.all(
-    response.results
-      .filter((page): page is PageObjectResponse => "properties" in page)
-      .map(async (page) => {
-        return await getPostFromPage(page);
-      })
+  return response.results.filter(
+    (page): page is PageObjectResponse => "properties" in page
   );
+});
 
-  return posts;
-}
+/**
+ * 목록/카드 렌더용 메타데이터. 본문 블록을 가져오지 않으므로 Notion 호출이 쿼리 1회로 끝난다.
+ */
+export const getAllPostsMeta = cache(async (): Promise<NotionPostMeta[]> => {
+  const pages = await fetchPublishedPages();
+  return pages.map(getPostMetaFromPage);
+});
 
-export async function getPostBySlug(slug: string): Promise<NotionPost | null> {
-  // 모든 포스트를 가져와서 슬러그 매칭
-  const allPosts = await getAllPosts();
-  const decodedSlug = decodeURIComponent(slug);
-  return (
-    allPosts.find(
-      (post) =>
-        post.slug === decodedSlug ||
-        decodeURIComponent(post.slug) === decodedSlug
-    ) || null
-  );
-}
+/**
+ * 상세 페이지용. 슬러그가 일치하는 **한 페이지의 본문만** 마크다운으로 변환한다.
+ */
+export const getPostBySlug = cache(
+  async (slug: string): Promise<NotionPost | null> => {
+    const decodedSlug = decodeURIComponent(slug);
+    const pages = await fetchPublishedPages();
+
+    const match = pages
+      .map((page) => ({ page, meta: getPostMetaFromPage(page) }))
+      .find(
+        ({ meta }) =>
+          meta.slug === decodedSlug ||
+          decodeURIComponent(meta.slug) === decodedSlug
+      );
+
+    if (!match) return null;
+
+    const mdBlocks = await n2m.pageToMarkdown(match.page.id);
+    const content = n2m.toMarkdownString(mdBlocks).parent;
+
+    return { ...match.meta, content };
+  }
+);
 
 function generateSlugFromTitle(title: string): string {
   return (
@@ -70,7 +93,7 @@ function generateSlugFromTitle(title: string): string {
   );
 }
 
-async function getPostFromPage(page: PageObjectResponse): Promise<NotionPost> {
+function getPostMetaFromPage(page: PageObjectResponse): NotionPostMeta {
   const properties = page.properties as unknown as NotionDatabaseProperties;
 
   // Extract properties
@@ -86,10 +109,6 @@ async function getPostFromPage(page: PageObjectResponse): Promise<NotionPost> {
   const manualSlug = properties.Slug?.rich_text?.[0]?.plain_text?.trim();
   const slug = manualSlug || generateSlugFromTitle(title);
 
-  // Get page content as markdown
-  const mdBlocks = await n2m.pageToMarkdown(page.id);
-  const content = n2m.toMarkdownString(mdBlocks).parent;
-
   return {
     id: page.id,
     title,
@@ -99,13 +118,12 @@ async function getPostFromPage(page: PageObjectResponse): Promise<NotionPost> {
     category,
     slug,
     url: `/blog/${slug}`,
-    content,
   };
 }
 
 export async function getPostsByCategory(
   category: "posts" | "notes"
-): Promise<NotionPost[]> {
-  const allPosts = await getAllPosts();
+): Promise<NotionPostMeta[]> {
+  const allPosts = await getAllPostsMeta();
   return allPosts.filter((post) => post.category === category);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { NotionPost } from "@/lib/types/notion";
+import type { NotionPostMeta } from "@/lib/types/notion";
 import PostCard from "./PostCard";
 import CategoryFilter from "./CategoryFilter";
 import { track } from "@/app/components/analytics/mixpanel";
@@ -9,7 +9,7 @@ import { track } from "@/app/components/analytics/mixpanel";
 type CategoryType = "all" | "posts" | "notes";
 
 interface BlogClientProps {
-  posts: NotionPost[];
+  posts: NotionPostMeta[];
   stats: {
     all: number;
     posts: number;
