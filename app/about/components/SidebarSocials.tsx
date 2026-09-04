@@ -7,7 +7,10 @@ import { socials, type Social } from "../data/about-data";
 import TrackedExternalLink from "@/app/components/analytics/TrackedExternalLink";
 import MagneticButton from "./effects/MagneticButton";
 
-const ICON_MAP: Record<Social["icon"], React.ComponentType<{ size?: number }>> = {
+const ICON_MAP: Record<
+  Social["icon"],
+  React.ComponentType<{ size?: number }>
+> = {
   github: FaGithub,
   linkedin: FaLinkedin,
   velog: SiVelog,

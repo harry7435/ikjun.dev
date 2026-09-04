@@ -8,7 +8,10 @@ import HoverTag from "./effects/HoverTag";
 
 interface Props {
   project: Project;
-  onOpen: (state: { project: Project; origin: { x: number; y: number } }) => void;
+  onOpen: (state: {
+    project: Project;
+    origin: { x: number; y: number };
+  }) => void;
 }
 
 export default function ProjectItem({ project, onOpen }: Props) {

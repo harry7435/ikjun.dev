@@ -13,7 +13,9 @@ function useRevealWidth(ratio: number) {
 
   useEffect(() => {
     if (!inView) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
     if (reduced) {
       setWidth(`${ratio * 100}%`);
       return;
@@ -25,7 +27,13 @@ function useRevealWidth(ratio: number) {
   return { ref, width };
 }
 
-function AnimatedBar({ ratio, className = "" }: { ratio: number; className?: string }) {
+function AnimatedBar({
+  ratio,
+  className = "",
+}: {
+  ratio: number;
+  className?: string;
+}) {
   const { ref, width } = useRevealWidth(ratio);
   return (
     <div
@@ -45,7 +53,10 @@ export default function MetricsBand() {
     <div className="mb-10 mt-8">
       <dl className="grid grid-cols-3 gap-4 sm:gap-6">
         {metrics.map((m) => (
-          <div key={m.label} className="border-t border-gray-200 pt-3 dark:border-gray-800">
+          <div
+            key={m.label}
+            className="border-t border-gray-200 pt-3 dark:border-gray-800"
+          >
             <dd className="font-mono text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
               <CountUp
                 value={m.value}
@@ -54,7 +65,9 @@ export default function MetricsBand() {
                 decimals={m.decimals}
               />
             </dd>
-            <dt className="mt-1 text-xs text-gray-500 dark:text-gray-400">{m.label}</dt>
+            <dt className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {m.label}
+            </dt>
             <AnimatedBar ratio={m.bar} className="mt-3" />
           </div>
         ))}

@@ -3,7 +3,9 @@
 import { useRef, useState } from "react";
 import SectionHeading from "./SectionHeading";
 import ProjectItem from "./ProjectItem";
-import ProjectDetailOverlay, { type OverlayState } from "./ProjectDetailOverlay";
+import ProjectDetailOverlay, {
+  type OverlayState,
+} from "./ProjectDetailOverlay";
 import { projects } from "../data/about-data";
 
 export default function ProjectsSection() {

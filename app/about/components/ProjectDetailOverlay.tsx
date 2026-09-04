@@ -81,9 +81,7 @@ export default function ProjectDetailOverlay({ state, onClose }: Props) {
     document.addEventListener("keydown", onKeyDown);
     // 마운트 후 닫기 버튼에 포커스
     const focusTimer = window.setTimeout(() => {
-      panelRef.current
-        ?.querySelector<HTMLElement>("[data-autofocus]")
-        ?.focus();
+      panelRef.current?.querySelector<HTMLElement>("[data-autofocus]")?.focus();
     }, 30);
 
     return () => {
@@ -178,7 +176,10 @@ export default function ProjectDetailOverlay({ state, onClose }: Props) {
               className="pointer-events-none absolute inset-0 backdrop-blur-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0, transition: { duration: exitDuration * 0.6 } }}
+              exit={{
+                opacity: 0,
+                transition: { duration: exitDuration * 0.6 },
+              }}
               transition={{ duration: 0.3, delay: revealDuration * 0.75 }}
             />
           )}
@@ -209,85 +210,89 @@ export default function ProjectDetailOverlay({ state, onClose }: Props) {
               }}
               onClick={(e) => e.stopPropagation()}
             >
-            <button
-              type="button"
-              data-autofocus
-              onClick={onClose}
-              aria-label="닫기"
-              className="absolute right-4 top-4 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-            >
-              <X size={20} />
-            </button>
+              <button
+                type="button"
+                data-autofocus
+                onClick={onClose}
+                aria-label="닫기"
+                className="absolute right-4 top-4 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+              >
+                <X size={20} />
+              </button>
 
-            <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
-              {state.project.period}
-            </p>
-            <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-              {state.project.title}
-            </h3>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              {state.project.description}
-            </p>
+              <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
+                {state.project.period}
+              </p>
+              <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                {state.project.title}
+              </h3>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {state.project.description}
+              </p>
 
-            <div className="mt-6 space-y-5 text-sm leading-6 text-gray-700 dark:text-gray-300">
-              <section>
-                <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
-                  Why
-                </h4>
-                <p>{state.project.whyContent}</p>
-              </section>
-              <section>
-                <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
-                  How
-                </h4>
-                <ul className="space-y-1.5">{htmlList(state.project.howContent)}</ul>
-              </section>
-              <section>
-                <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
-                  Result
-                </h4>
-                <ul className="space-y-1.5">{htmlList(state.project.resultContent)}</ul>
-              </section>
-            </div>
-
-            <ul className="mt-6 flex flex-wrap gap-1.5">
-              {state.project.techStack.map((tech) => (
-                <li
-                  key={tech}
-                  className="rounded-full bg-amber-100/70 px-2.5 py-0.5 font-mono text-[11px] text-amber-800 dark:bg-amber-900/30 dark:text-amber-200"
-                >
-                  {tech}
-                </li>
-              ))}
-            </ul>
-
-            {state.project.links.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-3 border-t border-gray-200 pt-5 dark:border-gray-800">
-                {state.project.links.map((link) => {
-                  const isGithub = link.label === "GitHub";
-                  return (
-                    <TrackedExternalLink
-                      key={link.href}
-                      href={link.href}
-                      label={`${state.project.title} ${link.label}`}
-                      surface="about_project_detail"
-                      className={
-                        isGithub
-                          ? "inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-amber-500 hover:text-amber-700 dark:border-gray-700 dark:text-gray-300 dark:hover:border-amber-400 dark:hover:text-amber-300"
-                          : "inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-600 dark:bg-white dark:text-gray-900 dark:hover:bg-amber-400"
-                      }
-                    >
-                      {link.label} 바로가기
-                      {isGithub ? (
-                        <FaGithub className="size-3.5" />
-                      ) : (
-                        <FaExternalLinkAlt className="size-3" />
-                      )}
-                    </TrackedExternalLink>
-                  );
-                })}
+              <div className="mt-6 space-y-5 text-sm leading-6 text-gray-700 dark:text-gray-300">
+                <section>
+                  <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
+                    Why
+                  </h4>
+                  <p>{state.project.whyContent}</p>
+                </section>
+                <section>
+                  <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
+                    How
+                  </h4>
+                  <ul className="space-y-1.5">
+                    {htmlList(state.project.howContent)}
+                  </ul>
+                </section>
+                <section>
+                  <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
+                    Result
+                  </h4>
+                  <ul className="space-y-1.5">
+                    {htmlList(state.project.resultContent)}
+                  </ul>
+                </section>
               </div>
-            )}
+
+              <ul className="mt-6 flex flex-wrap gap-1.5">
+                {state.project.techStack.map((tech) => (
+                  <li
+                    key={tech}
+                    className="rounded-full bg-amber-100/70 px-2.5 py-0.5 font-mono text-[11px] text-amber-800 dark:bg-amber-900/30 dark:text-amber-200"
+                  >
+                    {tech}
+                  </li>
+                ))}
+              </ul>
+
+              {state.project.links.length > 0 && (
+                <div className="mt-6 flex flex-wrap gap-3 border-t border-gray-200 pt-5 dark:border-gray-800">
+                  {state.project.links.map((link) => {
+                    const isGithub = link.label === "GitHub";
+                    return (
+                      <TrackedExternalLink
+                        key={link.href}
+                        href={link.href}
+                        label={`${state.project.title} ${link.label}`}
+                        surface="about_project_detail"
+                        className={
+                          isGithub
+                            ? "inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-amber-500 hover:text-amber-700 dark:border-gray-700 dark:text-gray-300 dark:hover:border-amber-400 dark:hover:text-amber-300"
+                            : "inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-600 dark:bg-white dark:text-gray-900 dark:hover:bg-amber-400"
+                        }
+                      >
+                        {link.label} 바로가기
+                        {isGithub ? (
+                          <FaGithub className="size-3.5" />
+                        ) : (
+                          <FaExternalLinkAlt className="size-3" />
+                        )}
+                      </TrackedExternalLink>
+                    );
+                  })}
+                </div>
+              )}
             </motion.div>
           </div>
         </motion.div>

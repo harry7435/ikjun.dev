@@ -38,7 +38,7 @@ export type AnalyticsEvent =
 
 export function track<N extends AnalyticsEvent["name"]>(
   name: N,
-  props: Extract<AnalyticsEvent, { name: N }>["props"],
+  props: Extract<AnalyticsEvent, { name: N }>["props"]
 ) {
   if (!isProd || !initialized) return;
   mixpanel.track(name, props);

@@ -2,7 +2,10 @@ import TrackedExternalLink from "./analytics/TrackedExternalLink";
 
 const SOCIAL_LINKS = [
   { label: "GitHub", href: "https://github.com/harry7435" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/ik-jun-cho-998292212/" },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/ik-jun-cho-998292212/",
+  },
   { label: "Velog", href: "https://velog.io/@harry7435" },
 ] as const;
 

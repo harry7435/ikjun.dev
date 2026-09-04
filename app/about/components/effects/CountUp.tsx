@@ -32,7 +32,9 @@ export default function CountUp({
   useEffect(() => {
     if (!inView) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
     if (reduced) {
       setDisplay(value);
       return;
@@ -47,7 +49,11 @@ export default function CountUp({
   }, [inView, value, duration]);
 
   return (
-    <span ref={ref} className={className} style={{ fontVariantNumeric: "tabular-nums" }}>
+    <span
+      ref={ref}
+      className={className}
+      style={{ fontVariantNumeric: "tabular-nums" }}
+    >
       {prefix}
       {display.toFixed(decimals)}
       {suffix}

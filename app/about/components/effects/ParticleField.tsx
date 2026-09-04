@@ -37,10 +37,7 @@ export default function ParticleField({ className }: { className?: string }) {
     const REPEL_DIST = 90;
 
     const seed = () => {
-      const count = Math.min(
-        38,
-        Math.round((width * height) / 9000)
-      );
+      const count = Math.min(38, Math.round((width * height) / 9000));
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -145,11 +142,5 @@ export default function ParticleField({ className }: { className?: string }) {
 
   if (!enabled) return null;
 
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden="true"
-      className={className}
-    />
-  );
+  return <canvas ref={canvasRef} aria-hidden="true" className={className} />;
 }
