@@ -201,7 +201,10 @@ export const projects: Project[] = [
     description: "가족 공유 가계부 웹 앱",
     period: "2025 — 현재",
     image: undefined,
-    links: [{ href: "https://2k-jii-money.vercel.app/", label: "Live" }],
+    links: [
+      { href: "https://2k-jii-money.vercel.app/", label: "Live" },
+      { href: "https://github.com/harry7435/2k-jii-money", label: "GitHub" },
+    ],
     whyContent:
       "기존 가계부 앱들이 개인 중심이라 가족 단위로 수입/지출을 함께 관리하고 공유하기 어려웠습니다.",
     howContent: [
