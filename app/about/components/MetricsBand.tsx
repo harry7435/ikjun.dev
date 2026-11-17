@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useInView } from "framer-motion";
 import CountUp from "./effects/CountUp";
-import { metrics, metricsCaption } from "../data/about-data";
+import { metrics, metricsCaption } from "@/content/profile";
 
 /** 스크롤 진입 시 0 → 목표 너비로 차오르는 값. reduced-motion이면 즉시. */
 function useRevealWidth(ratio: number) {
@@ -51,7 +51,7 @@ function AnimatedBar({
 export default function MetricsBand() {
   return (
     <div className="mb-10 mt-8">
-      <dl className="grid grid-cols-3 gap-4 sm:gap-6">
+      <dl className="grid grid-cols-2 gap-4 sm:gap-6">
         {metrics.map((m) => (
           <div
             key={m.label}

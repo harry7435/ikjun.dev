@@ -1,11 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaExternalLinkAlt, FaGithub } from "react-icons/fa";
 import { X } from "lucide-react";
-import type { Project } from "../data/about-data";
+import type { DemoId, Project } from "@/content/types";
+import InlineMarkdown from "./InlineMarkdown";
+import ChangeSummary from "./ChangeSummary";
+import ParallelFetchDemo from "./demos/ParallelFetchDemo";
+import SplashRoundTripDemo from "./demos/SplashRoundTripDemo";
+import SseStreamDemo from "./demos/SseStreamDemo";
+import TokenHandoffDemo from "./demos/TokenHandoffDemo";
 import TrackedExternalLink from "@/app/components/analytics/TrackedExternalLink";
 
 export interface OverlayState {
@@ -25,19 +32,45 @@ interface Props {
   onClose: () => void;
 }
 
-function htmlList(items: string[]) {
-  return items.map((item, i) => (
-    <li key={i} className="flex gap-2">
-      <span
-        className="mt-2 block size-1 flex-none rounded-full bg-amber-500 dark:bg-amber-400"
-        aria-hidden
-      />
-      <span
-        dangerouslySetInnerHTML={{ __html: item }}
-        className="[&_a]:font-medium [&_a]:text-amber-700 [&_a]:underline [&_a]:decoration-amber-500/60 [&_a]:underline-offset-2 dark:[&_a]:text-amber-300 [&_strong]:font-semibold [&_strong]:text-gray-900 dark:[&_strong]:text-white"
-      />
-    </li>
-  ));
+function Bullets({ items }: { items: string[] }) {
+  return (
+    <ul className="space-y-1.5">
+      {items.map((item, i) => (
+        <li key={i} className="flex gap-2">
+          <span
+            className="mt-2 block size-1 flex-none rounded-full bg-amber-500 dark:bg-amber-400"
+            aria-hidden
+          />
+          <span>
+            <InlineMarkdown>{item}</InlineMarkdown>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
+      {children}
+    </h4>
+  );
+}
+
+function DemoSlot({ demo }: { demo: DemoId }) {
+  switch (demo) {
+    case "splash-roundtrip":
+      return <SplashRoundTripDemo />;
+    case "parallel-fetch":
+      return <ParallelFetchDemo />;
+    case "sse-stream":
+      return <SseStreamDemo />;
+    case "token-handoff":
+      return <TokenHandoffDemo />;
+    default:
+      return null;
+  }
 }
 
 export default function ProjectDetailOverlay({ state, onClose }: Props) {
@@ -220,53 +253,95 @@ export default function ProjectDetailOverlay({ state, onClose }: Props) {
                 <X size={20} />
               </button>
 
-              <p className="font-mono text-xs text-gray-500 dark:text-gray-400">
-                {state.project.period}
-              </p>
-              <h3 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+              {(state.project.tag || state.project.note) && (
+                <p className="pr-8 font-mono text-xs text-gray-500 dark:text-gray-400">
+                  {[state.project.tag, state.project.note]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              )}
+              <h3 className="mt-1 pr-8 text-2xl font-bold text-gray-900 dark:text-white">
                 {state.project.title}
               </h3>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                {state.project.description}
-              </p>
+              {state.project.group === "side" && state.project.users && (
+                <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span
+                    className="block size-1.5 flex-none rounded-full bg-emerald-500"
+                    aria-hidden
+                  />
+                  {state.project.users}
+                </p>
+              )}
+
+              {state.project.change && (
+                <div className="mt-5">
+                  <ChangeSummary change={state.project.change} />
+                </div>
+              )}
+
+              {state.project.screenshots && (
+                <div
+                  className={`mt-5 grid grid-cols-2 gap-3 ${
+                    state.project.screenshots.length === 3 ? "sm:grid-cols-3" : ""
+                  }`}
+                >
+                  {state.project.screenshots.map((shot) => (
+                    <figure key={shot.src}>
+                      <Image
+                        src={shot.src}
+                        alt={shot.alt}
+                        width={780}
+                        height={1688}
+                        sizes="(min-width: 768px) 280px, 45vw"
+                        className="h-auto w-full rounded-xl border border-gray-200 dark:border-gray-800"
+                      />
+                      <figcaption className="mt-1.5 text-[11px] leading-4 text-gray-500 dark:text-gray-400">
+                        {shot.alt}
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )}
+
+              {state.project.demos && state.project.demos.length > 0 && (
+                <div className="mt-5 space-y-4">
+                  {state.project.demos.map((id) => (
+                    <DemoSlot key={id} demo={id} />
+                  ))}
+                </div>
+              )}
 
               <div className="mt-6 space-y-5 text-sm leading-6 text-gray-700 dark:text-gray-300">
                 <section>
-                  <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
-                    Why
-                  </h4>
-                  <p>{state.project.whyContent}</p>
+                  <SectionLabel>상황</SectionLabel>
+                  <Bullets items={state.project.situation} />
                 </section>
                 <section>
-                  <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
-                    How
-                  </h4>
-                  <ul className="space-y-1.5">
-                    {htmlList(state.project.howContent)}
-                  </ul>
+                  <SectionLabel>한 일</SectionLabel>
+                  <Bullets items={state.project.actions} />
                 </section>
                 <section>
-                  <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">
-                    Result
-                  </h4>
-                  <ul className="space-y-1.5">
-                    {htmlList(state.project.resultContent)}
-                  </ul>
+                  <SectionLabel>결과</SectionLabel>
+                  <p>
+                    <InlineMarkdown>{state.project.result}</InlineMarkdown>
+                  </p>
                 </section>
               </div>
 
-              <ul className="mt-6 flex flex-wrap gap-1.5">
-                {state.project.techStack.map((tech) => (
-                  <li
-                    key={tech}
-                    className="rounded-full bg-amber-100/70 px-2.5 py-0.5 font-mono text-[11px] text-amber-800 dark:bg-amber-900/30 dark:text-amber-200"
-                  >
-                    {tech}
-                  </li>
-                ))}
-              </ul>
+              {state.project.stack && state.project.stack.length > 0 && (
+                <ul className="mt-6 flex flex-wrap gap-1.5">
+                  {state.project.stack.map((tech) => (
+                    <li
+                      key={tech}
+                      className="rounded-full bg-amber-100/70 px-2.5 py-0.5 font-mono text-[11px] text-amber-800 dark:bg-amber-900/30 dark:text-amber-200"
+                    >
+                      {tech}
+                    </li>
+                  ))}
+                </ul>
+              )}
 
-              {state.project.links.length > 0 && (
+              {state.project.links && state.project.links.length > 0 && (
                 <div className="mt-6 flex flex-wrap gap-3 border-t border-gray-200 pt-5 dark:border-gray-800">
                   {state.project.links.map((link) => {
                     const isGithub = link.label === "GitHub";

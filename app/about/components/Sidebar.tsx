@@ -4,6 +4,7 @@ import SidebarNav from "./SidebarNav";
 import SidebarSocials from "./SidebarSocials";
 import ScrambleText from "./effects/ScrambleText";
 import ParticleField from "./effects/ParticleField";
+import { sidebarIntro, sidebarRole } from "@/content/profile";
 
 export default function Sidebar() {
   return (
@@ -15,10 +16,10 @@ export default function Sidebar() {
           조익준
         </h1>
         <h2 className="mt-3 text-lg font-medium text-gray-700 dark:text-gray-200 sm:text-xl">
-          <ScrambleText text="Frontend Engineer" />
+          <ScrambleText text={sidebarRole} />
         </h2>
         <p className="mt-4 max-w-xs text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-          사용자 경험과 성능을 같은 비중으로 설계하는 것을 좋아합니다.
+          {sidebarIntro}
         </p>
 
         <SidebarNav />

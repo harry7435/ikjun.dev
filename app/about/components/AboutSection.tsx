@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 import SectionHeading from "./SectionHeading";
 import { TypingText } from "./TypingText";
 import MetricsBand from "./MetricsBand";
-import { brandingStatement, shortBio } from "../data/about-data";
+import { brandingStatement, shortBio } from "@/content/profile";
 
 export default function AboutSection() {
   return (
