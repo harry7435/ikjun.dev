@@ -185,7 +185,7 @@ export default function ServeCourt() {
         aria-hidden
         className={`mb-1 h-4 text-center text-xs font-medium leading-4 text-stone-600 transition-opacity dark:text-gray-300 ${live && ready ? "opacity-100" : "opacity-0"}`}
       >
-        라켓을 당겼다 놓으면 서브, 탭하면 자동 서브
+        라켓을 당겼다 놓아 링을 맞혀 보세요
       </p>
       <div
         ref={boxRef}
