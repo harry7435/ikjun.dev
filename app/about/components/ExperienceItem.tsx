@@ -1,12 +1,31 @@
 "use client";
 
 import { FaExternalLinkAlt } from "react-icons/fa";
-import type { Experience } from "../data/about-data";
+import type { Experience } from "@/content/types";
 import TiltCard from "./effects/TiltCard";
 import HoverTag from "./effects/HoverTag";
+import InlineMarkdown from "./InlineMarkdown";
 
 interface Props {
   experience: Experience;
+}
+
+function Bullets({ items }: { items: string[] }) {
+  return (
+    <ul className="mt-2 space-y-1.5 text-sm leading-6 text-gray-700 dark:text-gray-300">
+      {items.map((item, i) => (
+        <li key={i} className="flex gap-2">
+          <span
+            className="mt-2 block size-1 flex-none rounded-full bg-amber-500 dark:bg-amber-400"
+            aria-hidden
+          />
+          <span>
+            <InlineMarkdown>{item}</InlineMarkdown>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 export default function ExperienceItem({ experience }: Props) {
@@ -23,61 +42,55 @@ export default function ExperienceItem({ experience }: Props) {
         </div>
 
         <div className="flex-1">
-          <h3 className="text-base font-semibold text-gray-900 transition-colors group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300">
-            {experience.role}{" "}
-            <span className="text-gray-600 dark:text-gray-400">·</span>{" "}
-            <span className="font-medium text-gray-700 dark:text-gray-200">
-              {experience.company}
+          <h3 className="flex flex-wrap items-baseline gap-x-2 text-base font-semibold text-gray-900 transition-colors group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300">
+            <span>
+              {experience.role}{" "}
+              <span className="text-gray-600 dark:text-gray-400">·</span>{" "}
+              <span className="font-medium text-gray-700 dark:text-gray-200">
+                {experience.company}
+              </span>
             </span>
+            {experience.link && (
+              <a
+                href={experience.link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 underline decoration-amber-500/60 underline-offset-2 transition-colors hover:text-amber-600 dark:text-amber-300 dark:hover:text-amber-200"
+              >
+                {experience.link.label}
+                <FaExternalLinkAlt className="size-2.5" />
+              </a>
+            )}
           </h3>
 
-          <div className="mt-4 space-y-5">
-            {experience.subsections.map((sub) => (
-              <div key={sub.title}>
-                <h4 className="flex flex-wrap items-baseline gap-x-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
-                  {sub.title}
-                  {sub.link && (
-                    <a
-                      href={sub.link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 underline decoration-amber-500/60 underline-offset-2 transition-colors hover:text-amber-600 dark:text-amber-300 dark:hover:text-amber-200"
-                    >
-                      {sub.link.label}
-                      <FaExternalLinkAlt className="size-2.5" />
-                    </a>
-                  )}
-                </h4>
-                <ul className="mt-2 space-y-1.5 text-sm leading-6 text-gray-700 dark:text-gray-300">
-                  {sub.bullets.map((bullet, i) => (
-                    <li key={i} className="flex gap-2">
-                      <span
-                        className="mt-2 block size-1 flex-none rounded-full bg-amber-500 dark:bg-amber-400"
-                        aria-hidden
-                      />
-                      <span
-                        dangerouslySetInnerHTML={{ __html: bullet }}
-                        className="[&_strong]:font-semibold [&_strong]:text-gray-900 dark:[&_strong]:text-white"
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
+            {experience.summary}
+          </p>
 
-          {experience.techStack && (
-            <ul className="mt-5 flex flex-wrap gap-1.5">
-              {experience.techStack.map((tech) => (
-                <HoverTag
-                  key={tech}
-                  className="rounded-full bg-amber-100/70 px-2.5 py-0.5 font-mono text-[11px] text-amber-800 dark:bg-amber-900/30 dark:text-amber-200"
-                >
-                  {tech}
-                </HoverTag>
-              ))}
-            </ul>
-          )}
+          <Bullets items={experience.highlights} />
+
+          <h4 className="mt-5 text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+            일하는 방식
+          </h4>
+          <Bullets items={experience.ways} />
+
+          <a
+            href="#projects"
+            className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-amber-700 underline decoration-amber-500/60 underline-offset-2 transition-colors hover:text-amber-600 dark:text-amber-300 dark:hover:text-amber-200"
+          >
+            실무 사례 보기 ↓
+          </a>
+
+          <ul className="mt-5 flex flex-wrap gap-1.5">
+            {experience.techStack.map((tech) => (
+              <HoverTag
+                key={tech}
+                className="rounded-full bg-amber-100/70 px-2.5 py-0.5 font-mono text-[11px] text-amber-800 dark:bg-amber-900/30 dark:text-amber-200"
+              >
+                {tech}
+              </HoverTag>
+            ))}
+          </ul>
         </div>
       </TiltCard>
     </li>

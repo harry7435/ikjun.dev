@@ -1,44 +1,60 @@
-import {
-  certifications,
-  education,
-  type Certification,
-} from "../data/about-data";
+import { certifications, education } from "@/content/credentials";
 
-export default function CredentialsBlock() {
+const CARD =
+  "rounded-md border border-gray-200 bg-white/60 p-4 transition-colors hover:border-amber-400/70 dark:border-gray-700 dark:bg-gray-900/40 dark:hover:border-amber-400/60";
+
+interface Item {
+  title: string;
+  meta: string;
+  detail: string;
+}
+
+function Group({ label, items }: { label: string; items: Item[] }) {
   return (
-    <div className="mt-6 grid gap-4 sm:grid-cols-2">
-      {certifications.map((cert) => (
-        <CertificationCard key={cert.title} cert={cert} />
-      ))}
-      <div className="rounded-md border border-gray-200 bg-white/60 p-4 dark:border-gray-700 dark:bg-gray-900/40 sm:col-span-2">
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-          {education.school}
-        </h4>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          {education.major} · {education.period}
-        </p>
+    <div>
+      <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+        {label}
+      </h4>
+      <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        {items.map((item) => (
+          <div key={item.title} className={CARD}>
+            <div className="flex items-baseline justify-between gap-2">
+              <h5 className="text-sm font-semibold text-gray-900 dark:text-white">
+                {item.title}
+              </h5>
+              <span className="flex-none font-mono text-xs text-gray-500 dark:text-gray-400">
+                {item.meta}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
+              {item.detail}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function CertificationCard({ cert }: { cert: Certification }) {
+export default function CredentialsBlock() {
   return (
-    <div className="rounded-md border border-gray-200 bg-white/60 p-4 transition-colors hover:border-amber-400/70 dark:border-gray-700 dark:bg-gray-900/40 dark:hover:border-amber-400/60">
-      <div className="flex items-baseline justify-between gap-2">
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-          {cert.title}
-        </h4>
-        <span className="font-mono text-xs text-gray-500 dark:text-gray-400">
-          {cert.date}
-        </span>
-      </div>
-      <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-        {cert.description}
-      </p>
-      <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
-        {cert.detail}
-      </p>
+    <div className="mt-6 space-y-8">
+      <Group
+        label="교육"
+        items={education.map((e) => ({
+          title: e.title,
+          meta: e.period,
+          detail: e.detail,
+        }))}
+      />
+      <Group
+        label="자격·수상"
+        items={certifications.map((c) => ({
+          title: c.title,
+          meta: c.date,
+          detail: c.detail,
+        }))}
+      />
     </div>
   );
 }

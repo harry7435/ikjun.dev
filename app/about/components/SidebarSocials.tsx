@@ -3,7 +3,8 @@
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { SiVelog } from "react-icons/si";
 import { Mail } from "lucide-react";
-import { socials, type Social } from "../data/about-data";
+import { socials } from "@/content/profile";
+import type { Social } from "@/content/types";
 import TrackedExternalLink from "@/app/components/analytics/TrackedExternalLink";
 import MagneticButton from "./effects/MagneticButton";
 
