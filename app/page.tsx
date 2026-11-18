@@ -13,8 +13,8 @@ export default function Home() {
             <span className="text-amber-600"> Ik Jun</span>입니다.
           </h1>
           <h2 className="max-w-2xl text-xl text-stone-600 dark:text-gray-300">
-            사람을 위해, 사람과 함께
-            <br className="sm:hidden" /> 성장하는 개발자를 꿈꿉니다.
+            매일 쓰이는 서비스를 만들고,
+            <br className="sm:hidden" /> 운영합니다.
           </h2>
         </div>
         <div className="absolute inset-0 hidden court:block" id="court-stage">
