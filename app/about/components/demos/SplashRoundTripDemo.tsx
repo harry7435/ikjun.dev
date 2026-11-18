@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { useInteractiveEnabled } from "../../hooks/useInteractiveEnabled";
+import { useInteractiveEnabled } from "@/app/hooks/useInteractiveEnabled";
 
 const CHANGES = [
   "로그인 확인과 토큰 발급을 한 요청으로 합침 (토큰 검증 2회 → 1회)",
