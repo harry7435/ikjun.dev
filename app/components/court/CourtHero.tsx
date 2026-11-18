@@ -7,6 +7,7 @@ import CourtOverlay from "./CourtOverlay";
 import { popoverReducer } from "./popover";
 import { usePopoverDismiss } from "./usePopoverDismiss";
 import StaticCourt from "./StaticCourt";
+import CourtLayer from "./CourtLayer";
 import {
   DT,
   RACKET_MAX_X,
@@ -20,7 +21,8 @@ import {
 } from "./physics";
 import type { SceneHandle, Theme } from "./scene";
 
-type Phase = "static" | "loading" | "ready";
+/** static: 게이트 false(PC 레이아웃에서는 보이지 않음) · loading: 코트만 · ready: 3D · failed: 로드 실패/컨텍스트 손실 */
+type Phase = "static" | "loading" | "ready" | "failed";
 
 /** idle 시점 실행 예약. 취소 함수를 반환한다(requestIdleCallback 미지원 시 setTimeout). */
 const idle = (cb: () => void): (() => void) => {
@@ -60,6 +62,7 @@ export default function CourtHero() {
   const popoverRef = useRef<HTMLDivElement>(null);
   const popoverZoneRef = useRef<ZoneId | null>(null);
   popoverZoneRef.current = popover?.zone ?? null;
+  const popClampRef = useRef({ headerBottom: -Infinity, height: 0 });
   // dispatch는 안정 참조라 ref 갱신 불필요
   const onZoneHitRef = useRef<(id: ZoneId) => void>((id) =>
     dispatch({ type: "hit", zone: id, now: performance.now() })
@@ -83,7 +86,7 @@ export default function CourtHero() {
         cleanup = start(createScene);
       } catch (err) {
         console.warn("[CourtHero] 3D 로드 실패, 정적 코트 유지", err);
-        if (!cancelled) setPhase("static");
+        if (!cancelled) setPhase("failed");
       }
     });
 
@@ -145,7 +148,9 @@ export default function CourtHero() {
         raf = requestAnimationFrame(frame);
         const dt = Math.min(0.05, (now - last) / 1000);
         last = now;
-        acc += dt;
+        // 등장 연출(코트 → 링·라켓 → 셔틀) 동안은 게임을 진행하지 않는다
+        if (scene.introDone()) acc += dt;
+        else acc = 0;
 
         // 라켓: 포인터를 z=0 평면으로 투영, ~50ms 평활 속도
         racket.px = racket.x;
@@ -234,8 +239,20 @@ export default function CourtHero() {
         if (pz && pel) {
           const z = ZONES.find((q) => q.id === pz);
           if (z) {
-            const p = scene.worldToScreen(z.cx, z.cy + z.r);
-            pel.style.transform = `translate(${p.x}px, ${p.y - 12}px) translate(-50%, -100%)`;
+            // 다른 링이 위에 있으면(아래 링) 팝오버를 링 아래에 둬 위 링을 가리지 않게 한다
+            const below = ZONES.some((o) => o.cy > z.cy);
+            if (below) {
+              const p = scene.worldToScreen(z.cx, z.cy - z.r);
+              pel.style.transform = `translate(${p.x}px, ${p.y + 12}px) translate(-50%, 0)`;
+            } else {
+              const p = scene.worldToScreen(z.cx, z.cy + z.r);
+              // 고정 헤더 아래로 클램프 (헤더 하단·팝오버 높이는 열림/리사이즈/스크롤 때만 측정)
+              const top = Math.max(
+                popClampRef.current.headerBottom + 8,
+                p.y - 12 - popClampRef.current.height
+              );
+              pel.style.transform = `translate(${p.x}px, ${top}px) translate(-50%, 0)`;
+            }
           }
         }
 
@@ -279,7 +296,7 @@ export default function CourtHero() {
         lost = true;
         console.warn("[CourtHero] WebGL context lost, 정적 코트로 복귀");
         stopLoop();
-        setPhase("static");
+        setPhase("failed");
       };
       canvas.addEventListener("webglcontextlost", onLost);
 
@@ -307,6 +324,31 @@ export default function CourtHero() {
 
   usePopoverDismiss(popover, dispatch, popoverRef);
 
+  // 팝오버가 열려 있는 동안 헤더 하단(스테이지 좌표)·팝오버 높이를 갱신
+  useEffect(() => {
+    if (!popover) return;
+    const measure = () => {
+      const stage = stageRef.current;
+      const header = document.querySelector("header");
+      const pel = popoverRef.current;
+      if (!stage) return;
+      popClampRef.current = {
+        headerBottom: header
+          ? header.getBoundingClientRect().bottom -
+            stage.getBoundingClientRect().top
+          : -Infinity,
+        height: pel ? pel.offsetHeight : 0,
+      };
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, { passive: true });
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure);
+    };
+  }, [popover]);
+
   // 팝오버가 닫히면 호버 플래그 리셋
   useEffect(() => {
     if (!popover)
@@ -321,17 +363,32 @@ export default function CourtHero() {
   }, [theme]);
 
   const show3D = phase === "ready";
+  // 라켓이 나타나는 시점(인트로 0.3s)에 맞춰 기본 커서를 숨긴다
+  const [cursorHidden, setCursorHidden] = useState(false);
+  useEffect(() => {
+    if (!show3D) {
+      setCursorHidden(false);
+      return;
+    }
+    const id = window.setTimeout(() => setCursorHidden(true), 300);
+    return () => window.clearTimeout(id);
+  }, [show3D]);
+  const failed = phase === "failed";
   return (
     <div
       ref={stageRef}
-      className={`absolute inset-0 ${show3D ? "cursor-none" : ""}`}
+      className={`absolute inset-0 ${cursorHidden ? "cursor-none" : ""}`}
     >
-      <div
-        inert={show3D}
-        className={`absolute inset-0 transition-opacity duration-300 ${show3D ? "pointer-events-none opacity-0" : "opacity-100"}`}
-      >
-        <StaticCourt />
-      </div>
+      {/* 로딩 중엔 코트만. 3D가 위에서 불투명해진 뒤(300ms) 사라진다 */}
+      <CourtLayer
+        className="[--cl-court:#eed1a1] [--cl-line:#fef3de] [--cl-net:#57534e] [--cl-post:#30291f] [--cl-tape:#fef3de] dark:[--cl-court:#29313b] dark:[--cl-line:#cbc3b6] dark:[--cl-net:#d6d3d1] dark:[--cl-post:#28231c] dark:[--cl-tape:#ded5c7]"
+        hidden={show3D || failed}
+      />
+      {failed && (
+        <div className="absolute inset-0">
+          <StaticCourt />
+        </div>
+      )}
       {enabled && (
         <canvas
           ref={canvasRef}

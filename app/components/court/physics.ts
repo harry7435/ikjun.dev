@@ -283,8 +283,9 @@ export interface Zone {
 }
 
 export const ZONES: readonly Zone[] = [
-  { id: "about", label: "About", href: "/about", cx: 2.8, cy: 2.5, r: 0.7 },
-  { id: "blog", label: "Blog", href: "/blog", cx: 5.0, cy: 1.05, r: 0.7 },
+  // 같은 x에 세로로 쌓아 높이만으로 목표가 갈린다(모바일 SERVE_ZONES와 같은 발상). 링 사이 간격 0.4m.
+  { id: "about", label: "About", href: "/about", cx: 4.0, cy: 3.5, r: 0.7 },
+  { id: "blog", label: "Blog", href: "/blog", cx: 4.0, cy: 1.7, r: 0.7 },
 ];
 
 const ZONE_COOLDOWN = 1.5;

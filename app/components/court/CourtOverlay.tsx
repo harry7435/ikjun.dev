@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { MutableRefObject, RefObject } from "react";
+import { useEffect, useState, type MutableRefObject, type RefObject } from "react";
 import { ZONES, type ZoneId } from "./physics";
 import type { PopoverState } from "./popover";
 
@@ -32,6 +32,12 @@ export default function CourtOverlay({
   popoverRef,
   opaquePopover = false,
 }: CourtOverlayProps) {
+  // 3D 등장 연출: 코트 크로스페이드(300ms) 뒤 링과 함께 라벨이 페이드인. 링크는 처음부터 포커스 가능.
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setShown(true), 300);
+    return () => window.clearTimeout(id);
+  }, []);
   return (
     <div className="pointer-events-none absolute inset-0">
       {ZONES.map((z) => (
@@ -44,7 +50,7 @@ export default function CourtOverlay({
           aria-label={`${z.label} 페이지로 이동`}
           onPointerEnter={() => onLinkHover(true)}
           onPointerLeave={() => onLinkHover(false)}
-          className="pointer-events-auto absolute left-0 top-0 flex cursor-pointer items-center justify-center rounded-full text-lg font-extrabold text-amber-800 will-change-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 dark:text-amber-400"
+          className={`pointer-events-auto absolute left-0 top-0 flex cursor-pointer items-center justify-center rounded-full text-lg font-extrabold text-amber-800 will-change-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 dark:text-amber-400 ${shown ? "opacity-100 transition-opacity duration-[250ms]" : "opacity-0 focus-visible:opacity-100"}`}
         >
           {z.label}
         </Link>
@@ -73,14 +79,14 @@ export default function CourtOverlay({
           <div className="flex gap-2">
             <Link
               href={hrefOf(popover.zone)}
-              className="rounded-md bg-amber-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+              className="cursor-pointer rounded-md bg-amber-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               이동하기
             </Link>
             <button
               type="button"
               onClick={onDismiss}
-              className="rounded-md border border-stone-300 px-3 py-1.5 text-sm font-semibold hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 dark:border-gray-600 dark:hover:bg-gray-700"
+              className="cursor-pointer rounded-md border border-stone-300 px-3 py-1.5 text-sm font-semibold hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 dark:border-gray-600 dark:hover:bg-gray-700"
             >
               계속 치기
             </button>

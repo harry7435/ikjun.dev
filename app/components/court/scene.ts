@@ -1,5 +1,23 @@
 import * as THREE from "three";
 import { NET_TOP, ZONES, type ZoneId } from "./physics";
+import {
+  CAM_BASE,
+  CAM_FAR,
+  CAM_LOOK,
+  CAM_NEAR,
+  COURT_L,
+  COURT_PAD,
+  COURT_W,
+  LINE_WIDTH,
+  LINE_Y,
+  POST_H,
+  POST_RADIUS,
+  POST_ZS,
+  TAPE,
+  courtLineSegments,
+  fovForAspect,
+  netGridPoints,
+} from "./courtView";
 
 /**
  * 홈 배드민턴 히어로의 three.js 장면. CourtHero가 import("./scene")로만 불러온다 —
@@ -22,6 +40,8 @@ export interface SceneHandle {
   shake(amount: number): void;
   pulseZone(id: ZoneId): void;
   popRacket(): void;
+  /** 등장 연출 진행: 0 = 코트만, 1 = 링·라켓·셔틀 모두 등장 완료 */
+  introDone(): boolean;
   /** 캔버스 기준 CSS px → z=0 평면 월드 좌표. 교차 없으면 null */
   screenToWorld(px: number, py: number): { x: number; y: number } | null;
   /** 월드 → 캔버스 기준 CSS px */
@@ -31,12 +51,12 @@ export interface SceneHandle {
   dispose(): void;
 }
 
-const CAM_DIST = 11;
-const WORLD_HALF_W = 7.2;
+/** 등장 연출(초): 코트 크로스페이드가 끝난 뒤 링·라켓 페이드인, 그 다음 셔틀 등장 */
+const INTRO_RINGS_AT = 0.3;
+const INTRO_RINGS_DUR = 0.25;
+const INTRO_SHUTTLE_AT = INTRO_RINGS_AT + INTRO_RINGS_DUR;
 const TRAIL_N = 36;
 const MAX_PARTICLES = 240;
-const COURT_L = 13.4;
-const COURT_W = 6.1;
 
 const THEMES = {
   light: { bg: 0xf5f5f4, court: 0xe9d6b4, line: 0xfafaf9, net: 0x57534e, accent: 0xb45309, hemi: 1.6, dir: 2.2, shadow: 0.28 },
@@ -52,9 +72,9 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
   const scene = new THREE.Scene();
   const background = new THREE.Color(THEMES[theme].bg);
   scene.background = background;
-  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 80);
-  const camBase = new THREE.Vector3(0.4, 3.3, CAM_DIST);
-  const camLook = new THREE.Vector3(0, 1.9, 0);
+  const camera = new THREE.PerspectiveCamera(40, 1, CAM_NEAR, CAM_FAR);
+  const camBase = new THREE.Vector3(CAM_BASE.x, CAM_BASE.y, CAM_BASE.z);
+  const camLook = new THREE.Vector3(CAM_LOOK.x, CAM_LOOK.y, CAM_LOOK.z);
   camera.position.copy(camBase);
   camera.lookAt(camLook);
   let width = 1;
@@ -76,7 +96,7 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
 
   // ---------- court ----------
   const courtMat = new THREE.MeshStandardMaterial({ color: 0xe9d6b4, roughness: 0.85 });
-  const court = new THREE.Mesh(new THREE.PlaneGeometry(COURT_L + 1.6, COURT_W + 1.6).rotateX(-Math.PI / 2), courtMat);
+  const court = new THREE.Mesh(new THREE.PlaneGeometry(COURT_L + COURT_PAD, COURT_W + COURT_PAD).rotateX(-Math.PI / 2), courtMat);
   court.receiveShadow = true;
   scene.add(court);
 
@@ -90,66 +110,57 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
   const lineMat = new THREE.MeshStandardMaterial({ color: 0xfafaf9, roughness: 0.7, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
   function courtLine(x1: number, z1: number, x2: number, z2: number) {
     const len = Math.hypot(x2 - x1, z2 - z1);
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(len, 0.04).rotateX(-Math.PI / 2), lineMat);
-    m.position.set((x1 + x2) / 2, 0.004, (z1 + z2) / 2);
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(len, LINE_WIDTH).rotateX(-Math.PI / 2), lineMat);
+    m.position.set((x1 + x2) / 2, LINE_Y, (z1 + z2) / 2);
     m.rotation.y = -Math.atan2(z2 - z1, x2 - x1);
     m.receiveShadow = true;
     scene.add(m);
   }
-  const hl = COURT_L / 2;
-  const hw = COURT_W / 2;
-  const sw = 5.18 / 2;
-  courtLine(-hl, -hw, hl, -hw);
-  courtLine(-hl, hw, hl, hw);
-  courtLine(-hl, -hw, -hl, hw);
-  courtLine(hl, -hw, hl, hw);
-  courtLine(-hl, -sw, hl, -sw);
-  courtLine(-hl, sw, hl, sw);
-  for (const sgn of [-1, 1]) {
-    courtLine(sgn * 1.98, -hw, sgn * 1.98, hw);
-    courtLine(sgn * 5.94, -hw, sgn * 5.94, hw);
-    courtLine(sgn * 1.98, 0, sgn * hl, 0);
-  }
+  for (const [x1, z1, x2, z2] of courtLineSegments()) courtLine(x1, z1, x2, z2);
 
   // ---------- net + posts ----------
   const netMat = new THREE.LineBasicMaterial({ color: 0x57534e, transparent: true, opacity: 0.75 });
   {
-    const pts: number[] = [];
-    const y0 = 0.76;
-    const y1 = NET_TOP;
-    const cell = 0.1;
-    for (let z = -hw; z <= hw + 1e-6; z += cell) pts.push(0, y0, z, 0, y1, z);
-    for (let y = y0; y <= y1 + 1e-6; y += cell) pts.push(0, y, -hw, 0, y, hw);
+    const pts = netGridPoints();
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
     scene.add(new THREE.LineSegments(g, netMat));
   }
   const postMat = new THREE.MeshStandardMaterial({ color: 0x44403c, roughness: 0.5, metalness: 0.4 });
-  for (const z of [-hw - 0.08, hw + 0.08]) {
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.04, NET_TOP + 0.05, 12), postMat);
-    post.position.set(0, (NET_TOP + 0.05) / 2, z);
+  for (const z of POST_ZS) {
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(POST_RADIUS.top, POST_RADIUS.bottom, POST_H, 12), postMat);
+    post.position.set(0, POST_H / 2, z);
     post.castShadow = true;
     scene.add(post);
   }
   const tape = new THREE.Mesh(
-    new THREE.BoxGeometry(0.03, 0.075, COURT_W + 0.16),
+    new THREE.BoxGeometry(TAPE.thick, TAPE.h, COURT_W + 0.16),
     new THREE.MeshStandardMaterial({ color: 0xfafaf9, roughness: 0.6 })
   );
   tape.position.set(0, NET_TOP - 0.035, 0);
   tape.castShadow = true;
   scene.add(tape);
 
+  // 등장 연출 대상 머티리얼(링·디스크·마커·라켓). base = 완료 시 불투명도
+  const introMats: { mat: THREE.Material; base: number }[] = [];
+  const fadeIn = <T extends THREE.Material>(mat: T, base = 1): T => {
+    mat.transparent = true;
+    mat.opacity = 0;
+    introMats.push({ mat, base });
+    return mat;
+  };
+
   // ---------- target zones ----------
   const zones = ZONES.map((d) => {
     const group = new THREE.Group();
-    const ringMat = new THREE.MeshStandardMaterial({ color: 0xd97706, emissive: 0xd97706, emissiveIntensity: 0.35, roughness: 0.4 });
+    const ringMat = fadeIn(new THREE.MeshStandardMaterial({ color: 0xd97706, emissive: 0xd97706, emissiveIntensity: 0.35, roughness: 0.4 }));
     group.add(new THREE.Mesh(new THREE.TorusGeometry(d.r, 0.05, 16, 64), ringMat));
-    const discMat = new THREE.MeshBasicMaterial({ color: 0xd97706, transparent: true, opacity: 0.08, depthWrite: false });
+    const discMat = fadeIn(new THREE.MeshBasicMaterial({ color: 0xd97706, depthWrite: false }), 0.08);
     group.add(new THREE.Mesh(new THREE.CircleGeometry(d.r, 48), discMat));
     group.position.set(d.cx, d.cy, 0);
     scene.add(group);
     // 바닥 마커(저비용 원 하나)
-    const markMat = new THREE.MeshBasicMaterial({ color: 0xd97706, transparent: true, opacity: 0.12, depthWrite: false });
+    const markMat = fadeIn(new THREE.MeshBasicMaterial({ color: 0xd97706, depthWrite: false }), 0.12);
     const mark = new THREE.Mesh(new THREE.CircleGeometry(d.r * 0.6, 32).rotateX(-Math.PI / 2), markMat);
     mark.position.set(d.cx, 0.01, 0);
     scene.add(mark);
@@ -360,7 +371,7 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
   const racketGroup = new THREE.Group(); // 원점 = 스트링 면 중심
   const racketPivot = new THREE.Group(); // 이동 방향으로 기울임
   racketGroup.add(racketPivot);
-  const frameMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.32, metalness: 0.15 });
+  const frameMat = fadeIn(new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.32, metalness: 0.15 }));
   {
     const rx = 0.16;
     const ry = 0.205;
@@ -379,11 +390,11 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
     }
     const sg = new THREE.BufferGeometry();
     sg.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
-    racketPivot.add(new THREE.LineSegments(sg, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 })));
+    racketPivot.add(new THREE.LineSegments(sg, fadeIn(new THREE.LineBasicMaterial({ color: 0xffffff }), 0.75)));
     const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.3, 8), frameMat);
     shaft.position.y = -ry - 0.15 + 0.03;
     shaft.castShadow = true;
-    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.2, 10), new THREE.MeshStandardMaterial({ color: 0x292524, roughness: 0.9 }));
+    const grip = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.2, 10), fadeIn(new THREE.MeshStandardMaterial({ color: 0x292524, roughness: 0.9 })));
     grip.position.y = -ry - 0.3 - 0.07;
     grip.castShadow = true;
     const throat = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.07, 3).rotateX(Math.PI), frameMat);
@@ -398,6 +409,13 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
   let shake = 0;
   let tilt = 0;
   let racketPop = 0;
+  let introT = 0;
+  let racketScale = 0.6;
+  let introK = 0; // 링·라켓 등장 진행(0~1), 펄스 등 per-frame 불투명도 갱신에도 곱한다
+  let introFinished = false;
+  shuttleGroup.visible = false;
+  trail.visible = false;
+  points.visible = false;
   const raycaster = new THREE.Raycaster();
   const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
   const ndc = new THREE.Vector2();
@@ -431,12 +449,37 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
     renderer.setSize(width, height, false);
     const aspect = width / height;
     camera.aspect = aspect;
-    camera.fov = Math.max(40, (2 * Math.atan(WORLD_HALF_W / aspect / CAM_DIST) * 180) / Math.PI);
+    camera.fov = fovForAspect(aspect);
     camera.updateProjectionMatrix();
     pMat.uniforms.uScale.value = (height * renderer.getPixelRatio()) / (2 * Math.tan((camera.fov * Math.PI) / 360));
   }
 
+  const ease = (t: number) => {
+    const c = Math.max(0, Math.min(1, t));
+    return c * c * (3 - 2 * c);
+  };
+  function updateIntro(dt: number) {
+    if (introFinished) return;
+    introT += dt;
+    const done = introT >= INTRO_SHUTTLE_AT;
+    const k = done ? 1 : ease((introT - INTRO_RINGS_AT) / INTRO_RINGS_DUR);
+    introK = k;
+    for (const m of introMats) m.mat.opacity = m.base * k;
+    racketScale = 0.6 + 0.4 * k;
+    if (done) {
+      for (const m of introMats) {
+        m.mat.transparent = m.base < 1;
+        m.mat.needsUpdate = true;
+      }
+      shuttleGroup.visible = true;
+      trail.visible = true;
+      points.visible = true;
+      introFinished = true;
+    }
+  }
+
   function render(v: RenderView) {
+    updateIntro(v.dt);
     // 셔틀
     shuttleGroup.position.set(v.shuttle.x, v.shuttle.y, 0);
     shuttleGroup.rotation.z = v.shuttle.ang;
@@ -444,18 +487,18 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
     updateTrail(v.shuttle.x, v.shuttle.y, v.shuttle.speed);
     updateParticles(v.dt);
     // 라켓
-    racketGroup.visible = v.racket.visible;
+    racketGroup.visible = v.racket.visible && introK > 0;
     racketGroup.position.set(v.racket.x, v.racket.y, 0);
     const target = Math.max(-0.9, Math.min(0.9, -v.racket.vx * 0.05));
     tilt += (target - tilt) * (1 - Math.exp(-v.dt * 14));
     racketPivot.rotation.z = tilt + 0.25;
     racketPop = Math.max(0, racketPop - v.dt * 6);
-    racketGroup.scale.setScalar(1 + racketPop * 0.25);
+    racketGroup.scale.setScalar(racketScale * (1 + racketPop * 0.25));
     // 영역
     for (const z of zones) {
       z.pulse = Math.max(0, z.pulse - v.dt * 2.5);
       z.ringMat.emissiveIntensity = 0.35 + 0.1 * Math.sin(v.time * 2 + z.cx) + z.pulse * 1.2;
-      z.discMat.opacity = 0.08 + z.pulse * 0.15;
+      z.discMat.opacity = (0.08 + z.pulse * 0.15) * introK;
       z.group.scale.setScalar(1 + z.pulse * 0.15);
     }
     // 카메라 흔들림
@@ -498,6 +541,7 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
       const z = zones.find((q) => q.id === id);
       if (z) z.pulse = 1;
     },
+    introDone: () => introT >= INTRO_SHUTTLE_AT,
     popRacket: () => {
       racketPop = 1;
     },

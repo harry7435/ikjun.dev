@@ -401,11 +401,51 @@ test("서브 링: 폰에서 지름 ≥ 56px, 바닥·네트와 겹치지 않고 
   );
 });
 
-test("PC ZONES는 바뀌지 않았다", () => {
+test("PC ZONES 위치 고정", () => {
   assert.deepEqual(
     ZONES.map((z) => [z.cx, z.cy, z.r]),
-    [[2.8, 2.5, 0.7], [5.0, 1.05, 0.7]]
+    [[4.0, 3.5, 0.7], [4.0, 1.7, 0.7]]
   );
+});
+
+/** PC: 플레이어가 (rx,ry)에서 (vx,vy)로 친 뒤 가장 먼저 맞는 링 id. 링에 못 닿으면 null. */
+function pcFirstZone(rx: number, ry: number, vx: number, vy: number): string | null {
+  const g = createGame(() => 0.5);
+  g.waitingServe = false;
+  const s = g.shuttle;
+  Object.assign(s, { x: rx, y: ry, px: rx, py: ry, vx: 0, vy: 0, resting: false, cd: 0 });
+  const r: Racket = { x: rx + vx * 0.01, y: ry + vy * 0.01, px: rx, py: ry, vx, vy };
+  if (!tryHit(s, r, () => 0.5)) return null;
+  for (let i = 0; i < 120 * 6 && !s.resting; i++)
+    for (const e of tickGame(g, null, { holdServe: true })) if (e.type === "zone") return e.zone.id;
+  return null;
+}
+
+test("PC 링: 세로 배치 — 같은 x, 링 사이 간격 0.3m 이상, 네트 상단보다 위", () => {
+  const [a, b] = ZONES;
+  assert.equal(a.cx, b.cx);
+  assert.ok(a.cy - a.r - (b.cy + b.r) >= 0.3);
+  assert.ok(a.cy > b.cy && b.cy - b.r > 0);
+});
+
+test("PC 링: 다양한 타구의 첫 명중이 두 링에 고르게 나뉜다", () => {
+  const count: Record<string, number> = { about: 0, blog: 0 };
+  for (let x = -3; x <= 0.4 + 1e-9; x += 0.4)
+    for (let y = 0.3; y <= 2.6; y += 0.4)
+      for (let sp = 5; sp <= 28; sp += 2)
+        for (let a = 0; a <= 85; a += 7) {
+          const t = (a * Math.PI) / 180;
+          const f = pcFirstZone(x, y, Math.cos(t) * sp, Math.sin(t) * sp);
+          if (f) count[f]++;
+        }
+  assert.ok(count.about >= 500 && count.blog >= 500, JSON.stringify(count));
+});
+
+test("PC 링: 낮은 직구는 Blog(아래), 높은 리프트는 About(위)을 먼저 맞힌다", () => {
+  const drive = pcFirstZone(-1, 1.2, 10 * Math.cos(0.1745), 10 * Math.sin(0.1745));
+  const lift = pcFirstZone(-1, 0.8, 12 * Math.cos(0.8727), 12 * Math.sin(0.8727));
+  assert.equal(drive, "blog", String(drive));
+  assert.equal(lift, "about", String(lift));
 });
 
 test("폰: 라켓 헤드는 박스 왼쪽 20~30%, 왼쪽·아래에 최대 당김(px)만큼 여유", () => {
