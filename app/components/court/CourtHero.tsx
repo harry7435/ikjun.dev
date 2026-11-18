@@ -102,6 +102,7 @@ export default function CourtHero() {
       let inView = true;
       let lost = false;
       let hadPointer = false;
+      let farSide = false;
       let speedT = 0;
       let speedPos = { x: 0, y: 0 };
 
@@ -120,6 +121,8 @@ export default function CourtHero() {
       };
       const onLeave = () => {
         pointer = null;
+        farSide = false;
+        stage.style.cursor = "";
       };
       stage.addEventListener("pointermove", onMove, { passive: true });
       stage.addEventListener("pointerleave", onLeave);
@@ -145,14 +148,24 @@ export default function CourtHero() {
         // 라켓: 포인터를 z=0 평면으로 투영, ~50ms 평활 속도
         racket.px = racket.x;
         racket.py = racket.y;
+        let onPlayerSide = false;
         if (pointer) {
           const w = scene.screenToWorld(pointer.x, pointer.y);
           if (w) {
-            racket.x = Math.min(RACKET_MAX_X, w.x);
-            racket.y = Math.max(0.12, w.y);
+            // 네트 너머(상대편)면 라켓을 내려놓은 것으로 취급: 숨김 + 시스템 커서
+            const far = w.x > RACKET_MAX_X;
+            if (far !== farSide) {
+              farSide = far;
+              stage.style.cursor = far ? "default" : "";
+            }
+            if (!far) {
+              onPlayerSide = true;
+              racket.x = w.x;
+              racket.y = Math.max(0.12, w.y);
+            }
           }
         }
-        if (pointer && !hadPointer) {
+        if (onPlayerSide && !hadPointer) {
           // 포인터 첫 샘플(초기/재진입): 긴 스윕·큰 속도 방지
           racket.px = racket.x;
           racket.py = racket.y;
@@ -165,8 +178,8 @@ export default function CourtHero() {
           racket.vy +=
             ((racket.y - racket.py) / Math.max(dt, 1e-3) - racket.vy) * k;
         }
-        hadPointer = pointer !== null;
-        const swingActive = pointer !== null && !hoveringLinkRef.current;
+        hadPointer = onPlayerSide;
+        const swingActive = onPlayerSide && !hoveringLinkRef.current;
 
         while (acc >= DT) {
           acc -= DT;
@@ -276,6 +289,7 @@ export default function CourtHero() {
         document.removeEventListener("visibilitychange", onVis);
         stage.removeEventListener("pointermove", onMove);
         stage.removeEventListener("pointerleave", onLeave);
+        stage.style.cursor = "";
         canvas.removeEventListener("webglcontextlost", onLost);
         scene.dispose();
         sceneRef.current = null;
