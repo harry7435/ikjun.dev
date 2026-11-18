@@ -39,7 +39,7 @@ const COURT_L = 13.4;
 const COURT_W = 6.1;
 
 const THEMES = {
-  light: { bg: 0xf5f5f4, court: 0xe9d6b4, line: 0xfafaf9, net: 0x57534e, accent: 0xd97706, hemi: 1.6, dir: 2.2, shadow: 0.28 },
+  light: { bg: 0xf5f5f4, court: 0xe9d6b4, line: 0xfafaf9, net: 0x57534e, accent: 0xb45309, hemi: 1.6, dir: 2.2, shadow: 0.28 },
   dark: { bg: 0x111827, court: 0x25344a, line: 0xe5e7eb, net: 0xd6d3d1, accent: 0xf59e0b, hemi: 1.1, dir: 1.7, shadow: 0.55 },
 } as const;
 

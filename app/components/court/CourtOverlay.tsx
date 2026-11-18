@@ -15,6 +15,8 @@ interface CourtOverlayProps {
   popover: PopoverState | null;
   onDismiss: () => void;
   popoverRef: RefObject<HTMLDivElement | null>;
+  /** 팝오버 배경을 불투명하게(모바일: 링과 겹침). 기본(PC)은 반투명. */
+  opaquePopover?: boolean;
 }
 
 /**
@@ -28,6 +30,7 @@ export default function CourtOverlay({
   popover,
   onDismiss,
   popoverRef,
+  opaquePopover = false,
 }: CourtOverlayProps) {
   return (
     <div className="pointer-events-none absolute inset-0">
@@ -41,7 +44,7 @@ export default function CourtOverlay({
           aria-label={`${z.label} 페이지로 이동`}
           onPointerEnter={() => onLinkHover(true)}
           onPointerLeave={() => onLinkHover(false)}
-          className="pointer-events-auto absolute left-0 top-0 flex cursor-pointer items-center justify-center rounded-full text-lg font-extrabold text-amber-700 will-change-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 dark:text-amber-400"
+          className="pointer-events-auto absolute left-0 top-0 flex cursor-pointer items-center justify-center rounded-full text-lg font-extrabold text-amber-800 will-change-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 dark:text-amber-400"
         >
           {z.label}
         </Link>
@@ -62,7 +65,7 @@ export default function CourtOverlay({
           onPointerEnter={() => onLinkHover(true)}
           onPointerLeave={() => onLinkHover(false)}
           onPointerDown={(e) => e.stopPropagation()}
-          className="pointer-events-auto absolute left-0 top-0 w-max cursor-default rounded-xl border border-stone-300 bg-white/95 p-4 text-stone-700 shadow-lg will-change-transform dark:border-gray-700 dark:bg-gray-800/95 dark:text-white"
+          className={`pointer-events-auto absolute left-0 top-0 w-max cursor-default rounded-xl border border-stone-300 p-4 text-stone-700 shadow-lg will-change-transform dark:border-gray-700 dark:text-white ${opaquePopover ? "bg-white dark:bg-gray-800" : "bg-white/95 dark:bg-gray-800/95"}`}
         >
           <p className="mb-3 font-semibold">
             {labelOf(popover.zone)} 페이지로 이동할까요?

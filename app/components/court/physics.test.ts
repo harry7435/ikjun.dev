@@ -4,8 +4,11 @@ import {
   DT, VT, V_MAX, NET_X, FLOOR_Y,
   createShuttle, step, tryHit, serve, wrapPi, targetAngle, toKmh, shouldShowSpeed,
   ZONES, createGame, tickGame,
+  serveLaunch, autoServeLaunch, predictPath, createServeGame, launchFromHand, tickServeGame,
+  HAND_X, HAND_Y, PULL_MIN, PULL_MAX, SERVE_V_MAX, REST_TIME_TO_SERVE,
   type Racket, type Shuttle, type Zone,
 } from "./physics.ts";
+import { serveLayout, racketHitArea, racketHeadWorld } from "./serveLayout.ts";
 
 const fixed = (v: number) => () => v;
 function airborne(x: number, y: number, vx: number, vy: number): Shuttle {
@@ -214,4 +217,140 @@ test("링 중심을 지나는 타구는 zone 이벤트, 옛 박스 모서리(원
   };
   assert.ok(at(about.cx, about.cy).includes("zone:about"));
   assert.ok(!at(about.cx + 0.65, about.cy + 0.5).includes("zone:about"));
+});
+
+// ---------- 모바일 서브 ----------
+
+test("serveLaunch: 발사 방향은 당김의 반대", () => {
+  const l = serveLaunch(-0.5, -0.5)!;
+  assert.ok(l.vx > 0 && l.vy > 0);
+  assert.ok(Math.abs(l.vx - l.vy) < 1e-9);
+  const m = serveLaunch(0.6, 0)!;
+  assert.ok(m.vx < 0 && Math.abs(m.vy) < 1e-9);
+});
+
+test("serveLaunch: 파워는 당김 길이에 비례하고 PULL_MAX에서 상한", () => {
+  const half = serveLaunch(-PULL_MAX / 2, 0)!;
+  assert.ok(Math.abs(Math.hypot(half.vx, half.vy) - SERVE_V_MAX / 2) < 1e-9);
+  const over = serveLaunch(-PULL_MAX * 3, -PULL_MAX * 3)!;
+  assert.ok(Math.abs(Math.hypot(over.vx, over.vy) - SERVE_V_MAX) < 1e-9);
+});
+
+test("serveLaunch: 임계(PULL_MIN) 미만이면 null(취소)", () => {
+  assert.equal(serveLaunch(0, 0), null);
+  assert.equal(serveLaunch(-PULL_MIN * 0.9, 0), null);
+  assert.ok(serveLaunch(-PULL_MIN * 1.01, 0));
+});
+
+test("autoServeLaunch: 네트에 닿지 않고 x>0에 착지", () => {
+  const l = autoServeLaunch();
+  const s = airborne(HAND_X, HAND_Y, l.vx, l.vy);
+  const ev = run(s, 6);
+  assert.ok(!ev.includes("net"), "net");
+  assert.ok(s.x > 0, `x=${s.x}`);
+  assert.ok(!zonesHit(l.vx, l.vy).size, "링을 지나지 않는다");
+  assert.ok(predictPath(HAND_X, HAND_Y, l.vx, l.vy, 6).every((p) => p.y < 3.95), "정점 ≤ 3.9m");
+});
+
+test("predictPath: 직접 시뮬레이션과 일치, 바닥에서 멈춤", () => {
+  const l = serveLaunch(-0.8, -0.6)!;
+  const pts = predictPath(HAND_X, HAND_Y, l.vx, l.vy, 10);
+  const s = airborne(HAND_X, HAND_Y, l.vx, l.vy);
+  for (let i = 1; i < pts.length; i++) {
+    step(s, DT);
+    assert.ok(Math.abs(pts[i].x - s.x) < 1e-9 && Math.abs(pts[i].y - s.y) < 1e-9, `i=${i}`);
+  }
+  assert.ok(pts[pts.length - 1].y <= FLOOR_Y + 1e-9);
+  assert.ok(predictPath(HAND_X, HAND_Y, l.vx, l.vy, 0.35).length <= Math.ceil(0.35 / DT) + 1);
+});
+
+function zonesHit(vx: number, vy: number): Set<string> {
+  const g = createServeGame();
+  launchFromHand(g, vx, vy);
+  const ids = new Set<string>();
+  for (let i = 0; i < 120 * 10 && !g.waitingServe; i++)
+    for (const e of tickServeGame(g, { holdServe: true })) if (e.type === "zone") ids.add(e.zone.id);
+  return ids;
+}
+
+test("모바일 서브: 당김 격자에서 About·Blog 링 모두 명중 가능(byPlayer 판정)", () => {
+  const found = new Set<string>();
+  for (let ang = 10; ang <= 85; ang += 5)
+    for (let len = 0.3; len <= PULL_MAX + 1e-9; len += 0.1) {
+      const a = (ang * Math.PI) / 180;
+      const l = serveLaunch(-Math.cos(a) * len, -Math.sin(a) * len)!;
+      for (const id of zonesHit(l.vx, l.vy)) found.add(id);
+    }
+  assert.ok(found.has("about") && found.has("blog"), [...found].join());
+});
+
+test("모바일 서브: 발사 직후 byPlayer=true, 대기 해제", () => {
+  const g = createServeGame();
+  assert.equal(g.waitingServe, true);
+  launchFromHand(g, 5, 5);
+  assert.equal(g.shuttle.byPlayer, true);
+  assert.equal(g.waitingServe, false);
+});
+
+test("모바일 서브: 대기 중엔 셔틀이 손에 머문다", () => {
+  const g = createServeGame();
+  for (let i = 0; i < 600; i++) tickServeGame(g);
+  assert.equal(g.shuttle.x, HAND_X);
+  assert.equal(g.shuttle.y, HAND_Y);
+  assert.equal(g.waitingServe, true);
+});
+
+test("모바일 서브: 정착 + REST_TIME 뒤 손으로 재장전(byPlayer 해제)", () => {
+  const g = createServeGame();
+  const l = autoServeLaunch();
+  launchFromHand(g, l.vx, l.vy);
+  let t = 0;
+  while (!g.waitingServe && t < 20) { tickServeGame(g); t += DT; }
+  assert.equal(g.waitingServe, true);
+  assert.ok(t > REST_TIME_TO_SERVE, `t=${t}`);
+  assert.equal(g.shuttle.x, HAND_X);
+  assert.equal(g.shuttle.y, HAND_Y);
+  assert.equal(g.shuttle.resting, true);
+  assert.equal(g.shuttle.byPlayer, false);
+});
+
+test("모바일 서브: holdServe 동안 재장전하지 않고, 해제하면 재장전", () => {
+  const g = createServeGame();
+  const l = autoServeLaunch();
+  launchFromHand(g, l.vx, l.vy);
+  for (let i = 0; i < 120 * 8; i++) tickServeGame(g, { holdServe: true });
+  assert.equal(g.waitingServe, false);
+  assert.equal(g.shuttle.resting, true);
+  tickServeGame(g);
+  assert.equal(g.waitingServe, true);
+});
+
+test("모바일 서브: 보이는 영역 밖으로 나가면 1초 안에 재장전(holdServe면 보류)", () => {
+  const view = { xMin: -1.5, xMax: 5.9 };
+  const g = createServeGame();
+  launchFromHand(g, -22, 6);
+  let t = 0;
+  while (!g.waitingServe && t < 5) { tickServeGame(g, { view }); t += DT; }
+  assert.equal(g.waitingServe, true);
+  assert.ok(t < 1, `t=${t}`);
+  const h = createServeGame();
+  launchFromHand(h, -22, 6);
+  for (let i = 0; i < 120; i++) tickServeGame(h, { view, holdServe: true });
+  assert.equal(h.waitingServe, false);
+});
+
+test("racketHitArea: 라켓 헤드(중심·타원 범위)가 s=36/46/78에서 영역 안, 좌측은 박스 안", () => {
+  for (const s of [36, 46, 78]) {
+    const w = s * 7.4;
+    const h = s * 4.6;
+    const lay = serveLayout(w, h);
+    const a = racketHitArea(lay);
+    assert.ok(a.x0 >= 0 && a.x1 - a.x0 >= 72 - 1e-9 && a.y1 - a.y0 >= 72 - 1e-9, `s=${s}`);
+    const head = racketHeadWorld();
+    for (const [dx, dy] of [[0, 0], [0.2, 0], [-0.2, 0], [0, 0.2], [0, -0.2]]) {
+      const x = lay.ox + (head.x + dx) * lay.s;
+      const y = lay.oy - (head.y + dy) * lay.s;
+      assert.ok(x >= a.x0 && x <= a.x1 && y >= a.y0 && y <= a.y1, `s=${s} d=${dx},${dy}`);
+    }
+  }
 });

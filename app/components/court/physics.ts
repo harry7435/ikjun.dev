@@ -314,6 +314,24 @@ export function createGame(rand: Rand = Math.random): Game {
   };
 }
 
+function checkZones(g: Game, events: GameEvent[]): void {
+  const s = g.shuttle;
+  const sp = Math.hypot(s.vx, s.vy);
+  for (const z of ZONES) {
+    g.zoneCd[z.id] = Math.max(0, g.zoneCd[z.id] - DT);
+    if (
+      g.zoneCd[z.id] === 0 &&
+      s.byPlayer &&
+      !s.resting &&
+      sp > 2 &&
+      Math.hypot(s.x - z.cx, s.y - z.cy) < z.r
+    ) {
+      g.zoneCd[z.id] = ZONE_COOLDOWN;
+      events.push({ type: "zone", zone: z });
+    }
+  }
+}
+
 /**
  * 고정 스텝(DT) 1회. racket이 null이면 타격 판정을 하지 않는다(링크·팝오버 호버 중).
  * opts.holdServe가 true면 서브 대기 전환은 그대로지만 serveTimer를 줄이지 않고 서브하지 않는다
@@ -331,20 +349,7 @@ export function tickGame(g: Game, racket: Racket | null, opts?: { holdServe?: bo
   const ev = step(s, DT);
   if (ev) events.push({ type: ev });
 
-  const sp = Math.hypot(s.vx, s.vy);
-  for (const z of ZONES) {
-    g.zoneCd[z.id] = Math.max(0, g.zoneCd[z.id] - DT);
-    if (
-      g.zoneCd[z.id] === 0 &&
-      s.byPlayer &&
-      !s.resting &&
-      sp > 2 &&
-      Math.hypot(s.x - z.cx, s.y - z.cy) < z.r
-    ) {
-      g.zoneCd[z.id] = ZONE_COOLDOWN;
-      events.push({ type: "zone", zone: z });
-    }
-  }
+  checkZones(g, events);
 
   if (g.waitingServe) {
     if (opts?.holdServe) return events;
@@ -364,6 +369,133 @@ export function tickGame(g: Game, racket: Racket | null, opts?: { holdServe?: bo
       s.x = s.px = SERVE_X;
       s.y = s.py = SERVE_Y;
     }
+  }
+  return events;
+}
+
+// ---------- 모바일 서브 게임 (2D, 터치) ----------
+// 라켓을 손 위치(HAND)에서 뒤로 당겼다 놓으면 반대 방향으로 셔틀이 발사된다.
+// 판정(링·byPlayer)과 물리는 PC와 동일하고, 서브 주체만 플레이어다.
+
+/** 서브 손(대기 위치). 네트(x=0) 왼쪽, 링은 네트 오른쪽. */
+export const HAND_X = -0.9;
+export const HAND_Y = 1.2;
+/** 이 길이(m) 미만으로 당기면 취소. */
+export const PULL_MIN = 0.2;
+/** 파워가 상한에 닿는 당김 길이(m). 폰(약 46px/m)에서 약 55px. */
+export const PULL_MAX = 1.2;
+/** 최대 당김 발사 속도(m/s). 공기저항 때문에 About·Blog 링 모두 도달 가능(테스트로 보장). */
+export const SERVE_V_MAX = 26;
+/** 탭 자동 서브: 각도(rad)·속도(m/s). 네트를 넘어 x>0에 떨어지는 클리어(링은 지나치지 않음 — 탭이 곧 이동 팝오버가 되지 않게). */
+export const AUTO_SERVE_ANGLE = (70 * Math.PI) / 180;
+export const AUTO_SERVE_SPEED = 10.5; // 정점 ≈3.7m(뷰 높이 4.4 아래), x≈2.0 착지
+
+/**
+ * 당김 벡터(월드 m, 손에서 라켓까지) → 발사 속도. 방향은 당김의 반대, 크기는 당김 길이에 비례(상한).
+ * PULL_MIN 미만이면 null(취소).
+ */
+export function serveLaunch(
+  dx: number,
+  dy: number
+): { vx: number; vy: number } | null {
+  const len = Math.hypot(dx, dy);
+  if (len < PULL_MIN) return null;
+  const power = (Math.min(len, PULL_MAX) / PULL_MAX) * SERVE_V_MAX;
+  return { vx: (-dx / len) * power, vy: (-dy / len) * power };
+}
+
+export function autoServeLaunch(): { vx: number; vy: number } {
+  return {
+    vx: Math.cos(AUTO_SERVE_ANGLE) * AUTO_SERVE_SPEED,
+    vy: Math.sin(AUTO_SERVE_ANGLE) * AUTO_SERVE_SPEED,
+  };
+}
+
+/** step()과 같은 물리로 궤적을 미리 계산. 바닥·네트에 닿으면 그 점까지 포함하고 멈춘다. */
+export function predictPath(
+  x: number,
+  y: number,
+  vx: number,
+  vy: number,
+  seconds: number,
+  stepDt: number = DT
+): { x: number; y: number }[] {
+  const s = createShuttle();
+  s.x = s.px = x;
+  s.y = s.py = y;
+  s.vx = vx;
+  s.vy = vy;
+  s.resting = false;
+  const pts = [{ x, y }];
+  for (let t = 0; t < seconds; t += stepDt) {
+    const ev = step(s, stepDt);
+    pts.push({ x: s.x, y: s.y });
+    if (ev || s.resting) break;
+  }
+  return pts;
+}
+
+function placeInHand(s: Shuttle): void {
+  s.x = s.px = HAND_X;
+  s.y = s.py = HAND_Y;
+  s.vx = s.vy = 0;
+  s.ang = s.pang = -Math.PI / 2;
+  s.angVel = 0;
+  s.spinVel = 0;
+  s.resting = true;
+  s.restTime = 0;
+  s.airTime = 0;
+  s.cd = 0;
+  s.byPlayer = false;
+}
+
+export function createServeGame(rand: Rand = Math.random): Game {
+  const g = createGame(rand);
+  placeInHand(g.shuttle);
+  g.shuttle.lastDir = 1;
+  g.waitingServe = true; // 대기(셔틀이 손에 있음)
+  return g;
+}
+
+/** 손 위치에서 (vx, vy)로 발사. 이후 명중 판정은 PC와 같다(byPlayer). */
+export function launchFromHand(g: Game, vx: number, vy: number): void {
+  const s = g.shuttle;
+  placeInHand(s);
+  s.vx = vx;
+  s.vy = vy;
+  s.ang = s.pang = Math.atan2(vy, vx);
+  s.resting = false;
+  s.lastDir = vx >= 0 ? 1 : -1;
+  s.spinVel = 12;
+  s.byPlayer = true;
+  g.waitingServe = false;
+}
+
+const OUT_OF_VIEW_MARGIN = 0.5;
+
+/**
+ * 모바일 고정 스텝 1회. 대기 중엔 아무것도 하지 않는다. 비행·정지 후 REST_TIME 경과(또는 화면 밖)하면
+ * 대기 상태로 복귀하되, holdServe(팝오버 열림)면 복귀하지 않는다.
+ */
+export function tickServeGame(
+  g: Game,
+  opts?: { holdServe?: boolean; view?: { xMin: number; xMax: number } }
+): GameEvent[] {
+  if (g.waitingServe) return [];
+  const s = g.shuttle;
+  const events: GameEvent[] = [];
+  const ev = step(s, DT);
+  if (ev) events.push({ type: ev });
+  checkZones(g, events);
+  // 보이는 영역(opts.view, m) 좌우 밖으로 나간 셔틀은 되돌아오지 않으므로 바로 재장전한다
+  const out =
+    opts?.view !== undefined &&
+    (s.x < opts.view.xMin - OUT_OF_VIEW_MARGIN ||
+      s.x > opts.view.xMax + OUT_OF_VIEW_MARGIN);
+  if (!opts?.holdServe && (out || needsServe(s))) {
+    placeInHand(s);
+    s.lastDir = 1;
+    g.waitingServe = true;
   }
   return events;
 }

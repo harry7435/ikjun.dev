@@ -5,6 +5,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useInteractiveEnabled } from "@/app/hooks/useInteractiveEnabled";
 import CourtOverlay from "./CourtOverlay";
 import { popoverReducer } from "./popover";
+import { usePopoverDismiss } from "./usePopoverDismiss";
 import StaticCourt from "./StaticCourt";
 import {
   DT,
@@ -304,28 +305,7 @@ export default function CourtHero() {
     };
   }, [enabled]);
 
-  // 팝오버 자동 닫힘(6초)·Esc(열려 있을 때만)·바깥 클릭
-  useEffect(() => {
-    if (!popover) return;
-    const id = window.setInterval(
-      () => dispatch({ type: "tick", now: performance.now() }),
-      250
-    );
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") dispatch({ type: "dismiss" });
-    };
-    const onDown = (e: PointerEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(e.target as Node))
-        dispatch({ type: "dismiss" });
-    };
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("pointerdown", onDown);
-    return () => {
-      window.clearInterval(id);
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("pointerdown", onDown);
-    };
-  }, [popover]);
+  usePopoverDismiss(popover, dispatch, popoverRef);
 
   // 팝오버가 닫히면 호버 플래그 리셋
   useEffect(() => {

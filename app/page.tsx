@@ -1,12 +1,13 @@
 import CardLink from "./components/card-link";
 import CourtHero from "./components/court/CourtHero";
+import ServeCourt from "./components/court/ServeCourt";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-stone-100 dark:bg-gray-900">
       {/* 기본은 원래 홈(텍스트+카드). court 화면(PC 정밀 포인터·모션 허용)에서만 높이 고정 코트 히어로(CLS 0). */}
       <section className="court:relative court:h-svh court:min-h-[560px] court:overflow-hidden">
-        <div className="container pointer-events-none relative z-[1] mx-auto px-6 pb-16 pt-24 court:pb-0">
+        <div className="container pointer-events-none relative z-[1] mx-auto px-6 pb-16 pt-24 court:pb-0 serve:pb-6">
           <h1 className="mb-6 text-4xl font-bold text-stone-700 dark:text-white md:text-5xl">
             안녕하세요!
             <br className="sm:hidden" />
@@ -21,6 +22,11 @@ export default function Home() {
           <CourtHero />
         </div>
       </section>
+
+      {/* serve 화면(모바일·태블릿, 모션 허용)에서만 높이 고정 2D 서브 코트(CLS 0). PC는 위 3D 히어로. */}
+      <div className="container mx-auto hidden px-6 pb-8 serve:block">
+        <ServeCourt />
+      </div>
 
       <div className="container mx-auto px-6 pb-12 court:pt-12">
         <section className="flex flex-col gap-8">
