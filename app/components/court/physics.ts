@@ -314,10 +314,10 @@ export function createGame(rand: Rand = Math.random): Game {
   };
 }
 
-function checkZones(g: Game, events: GameEvent[]): void {
+function checkZones(g: Game, events: GameEvent[], zones: readonly Zone[] = ZONES): void {
   const s = g.shuttle;
   const sp = Math.hypot(s.vx, s.vy);
-  for (const z of ZONES) {
+  for (const z of zones) {
     g.zoneCd[z.id] = Math.max(0, g.zoneCd[z.id] - DT);
     if (
       g.zoneCd[z.id] === 0 &&
@@ -377,18 +377,26 @@ export function tickGame(g: Game, racket: Racket | null, opts?: { holdServe?: bo
 // 라켓을 손 위치(HAND)에서 뒤로 당겼다 놓으면 반대 방향으로 셔틀이 발사된다.
 // 판정(링·byPlayer)과 물리는 PC와 동일하고, 서브 주체만 플레이어다.
 
-/** 서브 손(대기 위치). 네트(x=0) 왼쪽, 링은 네트 오른쪽. */
-export const HAND_X = -0.9;
-export const HAND_Y = 1.2;
+/** 서브 손(대기 위치). 네트(x=0)에서 2.6m 뒤 — 네트 위로 포물선이 보이고 라켓 왼쪽에 당길 공간이 남는다. */
+export const HAND_X = -2.6;
+export const HAND_Y = 1.5;
 /** 이 길이(m) 미만으로 당기면 취소. */
 export const PULL_MIN = 0.2;
-/** 파워가 상한에 닿는 당김 길이(m). 폰(약 46px/m)에서 약 55px. */
-export const PULL_MAX = 1.2;
+/** 파워가 상한에 닿는 당김 길이(m). 폰(박스 342px, 약 31px/m)에서 약 68px. */
+export const PULL_MAX = 2.2;
 /** 최대 당김 발사 속도(m/s). 공기저항 때문에 About·Blog 링 모두 도달 가능(테스트로 보장). */
-export const SERVE_V_MAX = 26;
+export const SERVE_V_MAX = 28;
+/**
+ * 모바일 전용 링. PC의 ZONES(r 0.7)와 같은 위치 체계지만 월드 스케일이 작아(약 31px/m) 반지름을 키웠다
+ * (지름 ≈ 57px). 판정·표시·링크가 모두 이 배열을 쓴다. PC ZONES는 건드리지 않는다.
+ */
+export const SERVE_ZONES: readonly Zone[] = [
+  { id: "about", label: "About", href: "/about", cx: 4.8, cy: 3.4, r: 0.92 },
+  { id: "blog", label: "Blog", href: "/blog", cx: 4.8, cy: 1.2, r: 0.92 },
+];
 /** 탭 자동 서브: 각도(rad)·속도(m/s). 네트를 넘어 x>0에 떨어지는 클리어(링은 지나치지 않음 — 탭이 곧 이동 팝오버가 되지 않게). */
-export const AUTO_SERVE_ANGLE = (70 * Math.PI) / 180;
-export const AUTO_SERVE_SPEED = 10.5; // 정점 ≈3.7m(뷰 높이 4.4 아래), x≈2.0 착지
+export const AUTO_SERVE_ANGLE = (60 * Math.PI) / 180;
+export const AUTO_SERVE_SPEED = 10.5; // 정점 ≈3.7m(뷰 높이 5.0 아래), x≈1.4 착지
 
 /**
  * 당김 벡터(월드 m, 손에서 라켓까지) → 발사 속도. 방향은 당김의 반대, 크기는 당김 길이에 비례(상한).
@@ -486,7 +494,7 @@ export function tickServeGame(
   const events: GameEvent[] = [];
   const ev = step(s, DT);
   if (ev) events.push({ type: ev });
-  checkZones(g, events);
+  checkZones(g, events, SERVE_ZONES);
   // 보이는 영역(opts.view, m) 좌우 밖으로 나간 셔틀은 되돌아오지 않으므로 바로 재장전한다
   const out =
     opts?.view !== undefined &&

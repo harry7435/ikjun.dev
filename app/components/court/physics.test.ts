@@ -3,12 +3,12 @@ import assert from "node:assert/strict";
 import {
   DT, VT, V_MAX, NET_X, FLOOR_Y,
   createShuttle, step, tryHit, serve, wrapPi, targetAngle, toKmh, shouldShowSpeed,
-  ZONES, createGame, tickGame,
+  ZONES, SERVE_ZONES, createGame, tickGame,
   serveLaunch, autoServeLaunch, predictPath, createServeGame, launchFromHand, tickServeGame,
   HAND_X, HAND_Y, PULL_MIN, PULL_MAX, SERVE_V_MAX, REST_TIME_TO_SERVE,
   type Racket, type Shuttle, type Zone,
 } from "./physics.ts";
-import { serveLayout, racketHitArea, racketHeadWorld } from "./serveLayout.ts";
+import { serveLayout, racketHitArea, racketHeadWorld, racketGeom, pullPose, PREVIEW_SECONDS, idlePose, D_IDLE, D_MAX, VIEW_W, VIEW_H, VIEW_X0, FLOOR_MARGIN } from "./serveLayout.ts";
 
 const fixed = (v: number) => () => v;
 function airborne(x: number, y: number, vx: number, vy: number): Shuttle {
@@ -273,15 +273,42 @@ function zonesHit(vx: number, vy: number): Set<string> {
   return ids;
 }
 
-test("모바일 서브: 당김 격자에서 About·Blog 링 모두 명중 가능(byPlayer 판정)", () => {
-  const found = new Set<string>();
-  for (let ang = 10; ang <= 85; ang += 5)
+/** 발사 후 가장 먼저 맞는 링 id(팝오버는 첫 명중으로 고정되므로). 없으면 null. */
+function firstZone(vx: number, vy: number): string | null {
+  const g = createServeGame();
+  launchFromHand(g, vx, vy);
+  for (let i = 0; i < 120 * 10 && !g.waitingServe; i++)
+    for (const e of tickServeGame(g, { holdServe: true })) if (e.type === "zone") return e.zone.id;
+  return null;
+}
+const pullAt = (angDeg: number, len: number) => {
+  const a = (angDeg * Math.PI) / 180;
+  return serveLaunch(-Math.cos(a) * len, -Math.sin(a) * len)!;
+};
+
+test("모바일 서브: 링이 세로로 쌓여 있어 높이만으로 목표가 갈린다(첫 명중 기준 각 20칸 이상)", () => {
+  const count: Record<string, number> = { about: 0, blog: 0 };
+  for (let ang = 0; ang <= 85; ang += 5)
     for (let len = 0.3; len <= PULL_MAX + 1e-9; len += 0.1) {
-      const a = (ang * Math.PI) / 180;
-      const l = serveLaunch(-Math.cos(a) * len, -Math.sin(a) * len)!;
-      for (const id of zonesHit(l.vx, l.vy)) found.add(id);
+      const l = pullAt(ang, len);
+      const f = firstZone(l.vx, l.vy);
+      if (f) count[f]++;
     }
-  assert.ok(found.has("about") && found.has("blog"), [...found].join());
+  assert.ok(count.about >= 20 && count.blog >= 20, JSON.stringify(count));
+});
+
+test("모바일 서브: 낮은 직구는 Blog(아래 링)를, 높은 클리어는 About(위 링)을 먼저 맞힌다", () => {
+  const flat = pullAt(10, 1.8);
+  assert.equal(firstZone(flat.vx, flat.vy), "blog");
+  const high = pullAt(30, 1.8);
+  assert.equal(firstZone(high.vx, high.vy), "about");
+});
+
+test("서브 링은 같은 x에 세로로 쌓여 있고 사이에 0.3m 이상 간격(About이 위)", () => {
+  const [about, blog] = [SERVE_ZONES[0], SERVE_ZONES[1]];
+  assert.equal(about.id, "about");
+  assert.equal(about.cx, blog.cx);
+  assert.ok(about.cy - blog.cy - about.r - blog.r >= 0.3);
 });
 
 test("모바일 서브: 발사 직후 byPlayer=true, 대기 해제", () => {
@@ -326,7 +353,7 @@ test("모바일 서브: holdServe 동안 재장전하지 않고, 해제하면 �
 });
 
 test("모바일 서브: 보이는 영역 밖으로 나가면 1초 안에 재장전(holdServe면 보류)", () => {
-  const view = { xMin: -1.5, xMax: 5.9 };
+  const view = { xMin: -5.0, xMax: 6.0 };
   const g = createServeGame();
   launchFromHand(g, -22, 6);
   let t = 0;
@@ -339,18 +366,128 @@ test("모바일 서브: 보이는 영역 밖으로 나가면 1초 안에 재장�
   assert.equal(h.waitingServe, false);
 });
 
-test("racketHitArea: 라켓 헤드(중심·타원 범위)가 s=36/46/78에서 영역 안, 좌측은 박스 안", () => {
-  for (const s of [36, 46, 78]) {
-    const w = s * 7.4;
-    const h = s * 4.6;
+test("racketHitArea: 라켓 헤드(중심·타원 범위)가 s=25/31/63에서 영역 안, 좌측은 박스 안", () => {
+  for (const s of [25, 31, 63]) {
+    const w = s * VIEW_W;
+    const h = s * VIEW_H;
     const lay = serveLayout(w, h);
     const a = racketHitArea(lay);
-    assert.ok(a.x0 >= 0 && a.x1 - a.x0 >= 72 - 1e-9 && a.y1 - a.y0 >= 72 - 1e-9, `s=${s}`);
+    assert.ok(a.x0 >= 0 && a.x1 - a.x0 >= 88 - 1e-9 && a.y1 - a.y0 >= 88 - 1e-9, `s=${s}`);
     const head = racketHeadWorld();
     for (const [dx, dy] of [[0, 0], [0.2, 0], [-0.2, 0], [0, 0.2], [0, -0.2]]) {
       const x = lay.ox + (head.x + dx) * lay.s;
       const y = lay.oy - (head.y + dy) * lay.s;
       assert.ok(x >= a.x0 && x <= a.x1 && y >= a.y0 && y <= a.y1, `s=${s} d=${dx},${dy}`);
     }
+  }
+});
+
+// ---------- 모바일 레이아웃 (342px 폰 박스) ----------
+
+const PHONE_W = 342;
+const phoneLay = () => serveLayout(PHONE_W, (PHONE_W * VIEW_H) / VIEW_W);
+
+test("서브 링: 폰에서 지름 ≥ 56px, 바닥·네트와 겹치지 않고 뷰 안(우측 여백 포함)", () => {
+  const { s } = phoneLay();
+  for (const z of SERVE_ZONES) {
+    assert.ok(z.r * 2 * s >= 56, `${z.id} d=${z.r * 2 * s}`);
+    assert.ok(z.cy - z.r > 0.2 && z.cx - z.r > NET_X + 1, z.id);
+    assert.ok(z.cx + z.r <= VIEW_X0 + VIEW_W - 0.1, z.id);
+    assert.ok(z.cy + z.r < VIEW_H - FLOOR_MARGIN, z.id);
+  }
+  assert.deepEqual(
+    SERVE_ZONES.map((z) => z.id),
+    ZONES.map((z) => z.id)
+  );
+});
+
+test("PC ZONES는 바뀌지 않았다", () => {
+  assert.deepEqual(
+    ZONES.map((z) => [z.cx, z.cy, z.r]),
+    [[2.8, 2.5, 0.7], [5.0, 1.05, 0.7]]
+  );
+});
+
+test("폰: 라켓 헤드는 박스 왼쪽 20~30%, 왼쪽·아래에 최대 당김(px)만큼 여유", () => {
+  const lay = phoneLay();
+  const head = racketHeadWorld();
+  const hx = lay.ox + head.x * lay.s;
+  const hy = lay.oy - head.y * lay.s;
+  assert.ok(hx / PHONE_W >= 0.2 && hx / PHONE_W <= 0.3, `${hx / PHONE_W}`);
+  const pullPx = PULL_MAX * lay.s;
+  assert.ok(pullPx >= 60 && pullPx <= 80, `pull=${pullPx}`);
+  assert.ok(hx - pullPx * 0.45 > 0, "라켓 헤드(RACKET_PULL_VIS)가 박스 밖으로 나가지 않는다");
+  const handX = lay.ox + HAND_X * lay.s;
+  assert.ok(handX > 0, "손은 박스 안");
+  assert.ok((PHONE_W * VIEW_H) / VIEW_W - hy > 0);
+});
+
+test("폰: 당김 미리보기가 네트를 넘는 호를 보여준다(전체 경로는 아님)", () => {
+  const l = serveLaunch(-1.2, -1.2)!;
+  const pts = predictPath(HAND_X, HAND_Y, l.vx, l.vy, PREVIEW_SECONDS);
+  assert.ok(pts.some((p) => p.x > NET_X), "네트 오른쪽까지 이어진다");
+  assert.ok(pts[pts.length - 1].y > FLOOR_Y + 0.1, "미리보기 안에 착지하지 않는다");
+});
+
+test("모바일 서브: PC ZONES(r 0.7)가 아닌 SERVE_ZONES로 판정", () => {
+  const g = createServeGame();
+  launchFromHand(g, 1, 0);
+  const z = SERVE_ZONES[0];
+  Object.assign(g.shuttle, { x: z.cx + 0.8, y: z.cy, px: z.cx + 0.8, py: z.cy, vx: -5, vy: 0 });
+  const ids: string[] = [];
+  for (let i = 0; i < 20; i++) for (const e of tickServeGame(g, { holdServe: true })) if (e.type === "zone") ids.push(e.zone.id);
+  assert.ok(ids.includes("about"), "r 0.7~0.9 사이 거리(0.8m)에서도 명중");
+});
+
+// ---------- 라켓 포즈 (면 법선 = 발사 방향, 접촉점 = HAND) ----------
+
+test("라켓 포즈: 면 법선이 발사 벡터와 평행, 샤프트는 면과 같은 평면(법선에 수직)", () => {
+  for (const [dx, dy] of [[-0.5, -0.5], [-1.2, -0.3], [-0.4, -1.6], [-2.0, 0.2]]) {
+    const l = serveLaunch(dx, dy)!;
+    const pose = pullPose(dx, dy);
+    const cross = pose.ux * l.vy - pose.uy * l.vx;
+    const dot = pose.ux * l.vx + pose.uy * l.vy;
+    assert.ok(Math.abs(cross) < 1e-9 && dot > 0, `${dx},${dy}`);
+    const g = racketGeom(pose);
+    assert.ok(Math.abs(g.sx * pose.ux + g.sy * pose.uy) < 1e-9);
+    assert.ok(g.sy <= 1e-9, "샤프트는 아래쪽");
+  }
+});
+
+test("라켓 포즈: 접촉(d=0)에서 면 중심 = HAND, 당길수록 셔틀 반대쪽으로 물러난다", () => {
+  const pose = pullPose(-1.0, -1.0);
+  const contact = racketGeom({ ...pose, d: 0 });
+  assert.ok(Math.abs(contact.cx - HAND_X) < 1e-12 && Math.abs(contact.cy - HAND_Y) < 1e-12);
+  const back = racketGeom(pose);
+  const l = serveLaunch(-1.0, -1.0)!;
+  assert.ok((back.cx - HAND_X) * l.vx + (back.cy - HAND_Y) * l.vy < 0, "발사 방향 반대편");
+  assert.ok(Math.abs(pullPose(-PULL_MAX * 2, 0).d - D_MAX) < 1e-9);
+  assert.ok(Math.abs(pullPose(-PULL_MIN * 0.5, 0).d - D_IDLE) < 0.1);
+  const i = idlePose();
+  const al = autoServeLaunch();
+  assert.ok(Math.abs(i.ux * al.vy - i.uy * al.vx) < 1e-9, "대기 포즈는 자동 서브 방향");
+});
+
+test("폰: 최대 당김 때도 라켓 면·샤프트 끝이 박스 안", () => {
+  const lay = phoneLay();
+  const boxH = (PHONE_W * VIEW_H) / VIEW_W;
+  for (let ang = 0; ang <= 85; ang += 5) {
+    const a = (ang * Math.PI) / 180;
+    const pose = pullPose(-Math.cos(a) * PULL_MAX, -Math.sin(a) * PULL_MAX);
+    const g = racketGeom(pose);
+    for (const k of [0, 0.26, 1.16]) {
+      const x = lay.ox + (g.cx + g.sx * k) * lay.s;
+      const y = lay.oy - (g.cy + g.sy * k) * lay.s;
+      assert.ok(x >= 0 && x <= PHONE_W && y >= 0 && y <= boxH, `ang=${ang} k=${k} (${x},${y})`);
+    }
+  }
+});
+
+test("라켓 포즈: 샤프트 방향은 면 방향이 수직(ux=0)을 지날 때도 연속", () => {
+  let prev = racketGeom({ ux: Math.cos(1.7), uy: Math.sin(1.7), d: 0.5 });
+  for (let a = 1.7; a >= 1.4; a -= 0.01) {
+    const g = racketGeom({ ux: Math.cos(a), uy: Math.sin(a), d: 0.5 });
+    assert.ok(Math.hypot(g.sx - prev.sx, g.sy - prev.sy) < 0.02, `a=${a}`);
+    prev = g;
   }
 });

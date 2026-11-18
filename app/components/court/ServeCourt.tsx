@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useServeCourtEnabled } from "@/app/hooks/useServeCourtEnabled";
 import CourtOverlay from "./CourtOverlay";
-import { ZONES, type ZoneId } from "./physics";
+import { SERVE_ZONES as ZONES, type ZoneId } from "./physics";
 import { popoverReducer } from "./popover";
 import { usePopoverDismiss } from "./usePopoverDismiss";
 import {
@@ -25,7 +25,7 @@ import type { ServeSceneHandle, Theme } from "./serveScene";
 
 type Phase = "static" | "loading" | "ready";
 
-const MIN_LINK_PX = 64;
+const MIN_LINK_PX = 56;
 
 /** idle 시점 실행 예약. 취소 함수를 반환한다(requestIdleCallback 미지원 시 setTimeout). */
 const idle = (cb: () => void): (() => void) => {
@@ -132,15 +132,23 @@ export default function ServeCourt() {
     const pel = popoverRef.current;
     const z = pz && ZONES.find((q) => q.id === pz);
     if (pel && z) {
+      // 링이 세로로 쌓여 있으므로 팝오버는 링 왼쪽(다른 링을 가리지 않는 쪽)에 두고, 세로는 링 중심에 맞춰 박스 안으로 clamp.
+      // 왼쪽에 폭이 안 나오면 링 위/아래로 폴백.
       const cx = lay.ox + z.cx * lay.s;
-      const topEdge = lay.oy - (z.cy + z.r) * lay.s;
-      const botEdge = lay.oy - (z.cy - z.r) * lay.s;
+      const cy = lay.oy - z.cy * lay.s;
       const pw = pel.offsetWidth;
       const ph = pel.offsetHeight;
-      const left = Math.min(Math.max(4, cx - pw / 2), Math.max(4, w - pw - 4));
-      // 링 위에 못 들어가면 아래, 위·아래 모두 박스를 넘으면 위(박스 밖으로 살짝 나가도 됨)
-      const above = topEdge - 12 - ph;
-      const top = above >= 4 ? above : botEdge + 12;
+      const leftSide = cx - z.r * lay.s - 12 - pw;
+      let left: number;
+      let top: number;
+      if (leftSide >= 2) {
+        left = leftSide;
+        top = Math.min(Math.max(4, cy - ph / 2), Math.max(4, h - ph - 4));
+      } else {
+        left = Math.min(Math.max(4, cx - pw / 2), Math.max(4, w - pw - 4));
+        const above = lay.oy - (z.cy + z.r) * lay.s - 12 - ph;
+        top = above >= 4 ? above : lay.oy - (z.cy - z.r) * lay.s + 12;
+      }
       pel.style.transform = `translate(${left}px, ${top}px)`;
     }
   }, []);
@@ -171,33 +179,34 @@ export default function ServeCourt() {
 
   const live = phase === "ready";
   return (
-    <div
-      ref={boxRef}
-      className="relative aspect-[16/10] max-h-[360px] w-full select-none text-stone-700 dark:text-gray-300"
-    >
-      <div
-        inert={live}
+    // z-[2]: 팝오버가 박스 밖으로 넘쳐도 아래 카드보다 위(헤더 z-10보다는 아래)에 그려지게 한다
+    <div className="relative z-[2]">
+      <p
         aria-hidden
-        className={`absolute inset-0 transition-opacity duration-300 ${live ? "opacity-0" : "opacity-100"}`}
+        className={`mb-1 h-4 text-center text-xs font-medium leading-4 text-stone-600 transition-opacity dark:text-gray-300 ${live && ready ? "opacity-100" : "opacity-0"}`}
       >
-        <StaticPlaceholder />
-      </div>
-      {enabled && (
-        <canvas
-          ref={canvasRef}
+        라켓을 당겼다 놓으면 서브, 탭하면 자동 서브
+      </p>
+      <div
+        ref={boxRef}
+        className="relative aspect-[11/5.2] max-h-[360px] w-full select-none text-stone-700 dark:text-gray-300"
+      >
+        <div
+          inert={live}
           aria-hidden
-          className={`absolute inset-0 size-full transition-opacity duration-300 ${live ? "opacity-100" : "opacity-0"}`}
-          style={{ touchAction: "pan-y pinch-zoom" }}
-        />
-      )}
-      {live && (
-        <>
-          <p
+          className={`absolute inset-0 transition-opacity duration-300 ${live ? "opacity-0" : "opacity-100"}`}
+        >
+          <StaticPlaceholder />
+        </div>
+        {enabled && (
+          <canvas
+            ref={canvasRef}
             aria-hidden
-            className={`pointer-events-none absolute inset-x-0 top-1 text-center text-xs font-medium text-stone-600 transition-opacity dark:text-gray-300 ${ready ? "opacity-100" : "opacity-0"}`}
-          >
-            라켓을 당겼다 놓으면 서브, 탭하면 자동 서브
-          </p>
+            className={`absolute inset-0 size-full transition-opacity duration-300 ${live ? "opacity-100" : "opacity-0"}`}
+            style={{ touchAction: "pan-y pinch-zoom" }}
+          />
+        )}
+        {live && (
           <CourtOverlay
             zoneRefs={zoneRefs}
             speedRef={speedRef}
@@ -207,8 +216,8 @@ export default function ServeCourt() {
             popoverRef={popoverRef}
             opaquePopover
           />
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }

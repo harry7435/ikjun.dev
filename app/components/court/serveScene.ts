@@ -7,8 +7,7 @@ import {
   DT,
   HAND_X,
   HAND_Y,
-  PULL_MAX,
-  ZONES,
+  SERVE_ZONES,
   autoServeLaunch,
   createServeGame,
   launchFromHand,
@@ -17,7 +16,18 @@ import {
   tickServeGame,
   type ZoneId,
 } from "./physics";
-import { GRIP_X, GRIP_Y, RACKET_LEN, racketHitArea, serveLayout } from "./serveLayout";
+import {
+  FACE_HALF,
+  FACE_THICK,
+  PREVIEW_SECONDS,
+  SHAFT_LEN,
+  idlePose,
+  pullPose,
+  racketGeom,
+  racketHitArea,
+  serveLayout,
+  type RacketPose,
+} from "./serveLayout";
 
 export type Theme = "light" | "dark";
 
@@ -71,9 +81,10 @@ const NET_TOP = 1.55;
 const SWING_MS = 120;
 const TAP_SLOP_PX = 10;
 const TRAIL_MAX = 16;
-const PREVIEW_SECONDS = 0.35;
-/** 라켓 헤드가 당김 거리의 이 비율만 움직인다(뷰 왼쪽 가장자리에 잘리지 않게). 발사 벡터와는 무관. */
-const RACKET_PULL_VIS = 0.45;
+const FOLLOW_MS = 100; // 접촉 뒤 follow-through
+const RETURN_MS = 200; // 대기 포즈로 복귀
+const FOLLOW_D = -0.4; // 접촉점을 지나 나아가는 거리(m)
+const TAP_BACKSWING_D = 0.6; // 탭 자동 서브의 뒤로 뺀 거리(m)
 
 interface Gesture {
   startX: number;
@@ -98,11 +109,12 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
   let lay = serveLayout(w, h);
 
   let gesture: Gesture | null = null;
-  let swing: { t0: number; vx: number; vy: number; fromX: number; fromY: number } | null = null;
+  /** 스윙: from 포즈에서 접촉(d=0)까지 SWING_MS. 접촉 시점에 발사한다. */
+  let swing: { t0: number; vx: number; vy: number; from: RacketPose } | null = null;
+  /** 접촉 뒤 follow-through → 대기 포즈 복귀(또는 취소 시 복귀만) */
+  let follow: { t0: number; pose: RacketPose; skipFollow: boolean } | null = null;
   const pulse: Record<ZoneId, number> = { about: 0, blog: 0 };
   const trail: { x: number; y: number; age: number }[] = [];
-  let tilt = 0; // 라켓이 휴식 자세로 돌아오는 중(0~1 당김 비율 잔상)
-  let tiltPull = { x: 0, y: 0 };
   let lastReady = true;
   let first = true;
   let acc = 0;
@@ -128,28 +140,26 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
   };
 
   // ---------- 그리기 ----------
-  const racketAngleTo = (tx: number, ty: number) => Math.atan2(ty - GRIP_Y, tx - GRIP_X);
-
-  function drawRacket(headTargetX: number, headTargetY: number) {
+  /** 라켓: 면(타원, 법선=발사 방향)과 면 평면의 샤프트. 헤드 중심·방향은 racketGeom(순수)이 정한다. */
+  function drawRacket(pose: RacketPose) {
     const p = PALETTE[theme];
-    const a = racketAngleTo(headTargetX, headTargetY);
-    const gx = px(GRIP_X);
-    const gy = py(GRIP_Y);
-    const hx = gx + Math.cos(a) * RACKET_LEN * lay.s;
-    const hy = gy - Math.sin(a) * RACKET_LEN * lay.s;
+    const g = racketGeom(pose);
+    const cx = px(g.cx);
+    const cy = py(g.cy);
+    // 샤프트: 면 가장자리에서 면 평면을 따라 아래로
     c2d.lineCap = "round";
     c2d.strokeStyle = p.racket;
     c2d.lineWidth = Math.max(2, 0.05 * lay.s);
     c2d.beginPath();
-    c2d.moveTo(gx, gy);
-    c2d.lineTo(hx, hy);
+    c2d.moveTo(cx + g.sx * FACE_HALF * lay.s, cy - g.sy * FACE_HALF * lay.s);
+    c2d.lineTo(cx + g.sx * (FACE_HALF + SHAFT_LEN) * lay.s, cy - g.sy * (FACE_HALF + SHAFT_LEN) * lay.s);
     c2d.stroke();
-    // 헤드(타원)
+    // 면(옆에서 본 얇은 타원): 장축 = 샤프트 방향, 단축 = 발사 방향
     c2d.save();
-    c2d.translate(hx + Math.cos(a) * 0.1 * lay.s, hy - Math.sin(a) * 0.1 * lay.s);
-    c2d.rotate(-a);
+    c2d.translate(cx, cy);
+    c2d.rotate(-Math.atan2(g.sy, g.sx));
     c2d.beginPath();
-    c2d.ellipse(0, 0, 0.22 * lay.s, 0.14 * lay.s, 0, 0, Math.PI * 2);
+    c2d.ellipse(0, 0, FACE_HALF * lay.s, Math.max(3, FACE_THICK * lay.s), 0, 0, Math.PI * 2);
     c2d.fillStyle = p.racketFill;
     c2d.fill();
     c2d.lineWidth = Math.max(1.5, 0.035 * lay.s);
@@ -208,7 +218,7 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
     c2d.globalAlpha = 1;
 
     // 링
-    for (const z of ZONES) {
+    for (const z of SERVE_ZONES) {
       const k = pulse[z.id];
       const r = z.r * lay.s * (1 + 0.25 * k);
       c2d.beginPath();
@@ -237,25 +247,30 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
     }
     c2d.globalAlpha = 1;
 
-    // 라켓
-    let headX = HAND_X;
-    let headY = HAND_Y;
+    // 라켓 포즈
+    const idle = idlePose();
+    let pose: RacketPose = idle;
     if (swing) {
       const t = Math.min(1, (now - swing.t0) / SWING_MS);
-      const e = t * t; // ease-in: 빠르게 휘두름
-      headX = swing.fromX + (HAND_X - swing.fromX) * e;
-      headY = swing.fromY + (HAND_Y - swing.fromY) * e;
+      pose = { ux: swing.from.ux, uy: swing.from.uy, d: swing.from.d * (1 - t * t) }; // ease-in, t=1에서 d=0(접촉)
+    } else if (follow) {
+      const t = (now - follow.t0) / (follow.skipFollow ? 1 : FOLLOW_MS);
+      if (!follow.skipFollow && t < 1) {
+        const e = 1 - (1 - t) * (1 - t);
+        pose = { ux: follow.pose.ux, uy: follow.pose.uy, d: FOLLOW_D * e };
+      } else {
+        const r = Math.min(1, ((now - follow.t0) - (follow.skipFollow ? 0 : FOLLOW_MS)) / RETURN_MS);
+        const from = follow.skipFollow ? follow.pose : { ...follow.pose, d: FOLLOW_D };
+        const ux = from.ux + (idle.ux - from.ux) * r;
+        const uy = from.uy + (idle.uy - from.uy) * r;
+        const n = Math.hypot(ux, uy) || 1;
+        pose = { ux: ux / n, uy: uy / n, d: from.d + (idle.d - from.d) * r };
+        if (r >= 1) follow = null;
+      }
     } else if (gesture?.moved) {
-      const len = Math.hypot(gesture.pullX, gesture.pullY);
-      const k = len > PULL_MAX ? PULL_MAX / len : 1;
-      headX = HAND_X + gesture.pullX * k * RACKET_PULL_VIS;
-      headY = HAND_Y + gesture.pullY * k * RACKET_PULL_VIS;
-    } else if (tilt > 0) {
-      headX = HAND_X + tiltPull.x * tilt * RACKET_PULL_VIS;
-      headY = HAND_Y + tiltPull.y * tilt * RACKET_PULL_VIS;
-      tilt = Math.max(0, tilt - dt / 0.15);
+      pose = pullPose(gesture.pullX, gesture.pullY);
     }
-    drawRacket(headX, headY);
+    drawRacket(pose);
 
     // 궤적 미리보기(점선 느낌의 점)
     if (gesture?.moved && !swing) {
@@ -264,6 +279,7 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
         const pts = predictPath(HAND_X, HAND_Y, l.vx, l.vy, PREVIEW_SECONDS);
         c2d.fillStyle = p.accent;
         for (let i = 3; i < pts.length; i += 4) {
+          if (py(pts[i].y) < 2) continue; // 캔버스 위로 나간 점은 그리지 않는다
           c2d.globalAlpha = 0.9 - (i / pts.length) * 0.5;
           c2d.beginPath();
           c2d.arc(px(pts[i].x), py(pts[i].y), 2.2, 0, Math.PI * 2);
@@ -292,7 +308,7 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
     (!game.waitingServe && !(opts.isHeld() && game.shuttle.resting)) ||
     gesture !== null ||
     swing !== null ||
-    tilt > 0 ||
+    follow !== null ||
     trail.length > 0 ||
     pulse.about > 0 ||
     pulse.blog > 0;
@@ -303,7 +319,9 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
     last = now;
 
     if (swing && now - swing.t0 >= SWING_MS) {
+      // 접촉 프레임: 면 중심이 HAND(셔틀)에 도달한 순간 발사
       launchFromHand(game, swing.vx, swing.vy);
+      follow = { t0: now, pose: swing.from, skipFollow: false };
       swing = null;
     }
 
@@ -348,6 +366,9 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
     raf = requestAnimationFrame(frame);
   }
   function stop() {
+    // 숨김/화면 밖 동안 대기 중이던 스윙은 버린다(복귀 시 갑자기 발사되지 않게). 셔틀은 접촉 전이라 아직 손에 있다.
+    swing = null;
+    follow = null;
     running = false;
     cancelAnimationFrame(raf);
   }
@@ -367,6 +388,7 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
     if (gesture || swing || !game.waitingServe) return false;
     if (!inHitArea(x, y)) return false;
     gesture = { startX: x, startY: y, moved: false, pullX: 0, pullY: 0 };
+    follow = null;
     opts.onPulling(true);
     wake();
     return true;
@@ -390,25 +412,23 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
     if (!g.moved) {
       // 움직임이 거의 없으면 길게 눌렀다 떼도 탭(단일 탭 대안, WCAG 2.5.1)
       const l = autoServeLaunch();
-      swing = { t0: now, vx: l.vx, vy: l.vy, fromX: HAND_X - 0.35, fromY: HAND_Y - 0.4 };
+      const n = Math.hypot(l.vx, l.vy);
+      swing = { t0: now, vx: l.vx, vy: l.vy, from: { ux: l.vx / n, uy: l.vy / n, d: TAP_BACKSWING_D } };
       wake();
       return;
     }
     const l = serveLaunch(g.pullX, g.pullY);
     if (l) {
-      const len = Math.hypot(g.pullX, g.pullY);
-      const k = len > PULL_MAX ? PULL_MAX / len : 1;
-      swing = { t0: now, vx: l.vx, vy: l.vy, fromX: HAND_X + g.pullX * k * RACKET_PULL_VIS, fromY: HAND_Y + g.pullY * k * RACKET_PULL_VIS };
+      swing = { t0: now, vx: l.vx, vy: l.vy, from: pullPose(g.pullX, g.pullY) };
     } else {
-      // 취소: 라켓이 천천히 제자리로
-      const len = Math.hypot(g.pullX, g.pullY);
-      tiltPull = { x: g.pullX, y: g.pullY };
-      tilt = len > 0 ? 1 : 0;
+      // 취소: 라켓이 제자리(대기 포즈)로 복귀
+      follow = { t0: now, pose: pullPose(g.pullX, g.pullY), skipFollow: true };
     }
     wake();
   }
   function gCancel() {
     if (!gesture) return;
+    if (gesture.moved) follow = { t0: performance.now(), pose: pullPose(gesture.pullX, gesture.pullY), skipFollow: true };
     gesture = null;
     opts.onPulling(false);
     wake();
