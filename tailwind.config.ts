@@ -9,6 +9,12 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      // useInteractiveEnabled 훅의 조건과 동일하게 유지할 것
+      screens: {
+        court: {
+          raw: "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+        },
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
