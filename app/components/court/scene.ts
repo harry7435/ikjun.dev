@@ -141,14 +141,19 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
 
   // ---------- target zones ----------
   const zones = ZONES.map((d) => {
-    const boxGeo = new THREE.BoxGeometry(d.w, d.h, 1.4);
-    const mat = new THREE.MeshBasicMaterial({ color: 0xd97706, transparent: true, opacity: 0.16, depthWrite: false });
-    const mesh = new THREE.Mesh(boxGeo, mat);
-    const edgeMat = new THREE.LineBasicMaterial({ color: 0xd97706 });
-    mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(boxGeo), edgeMat));
-    mesh.position.set(d.cx, d.cy, 0);
-    scene.add(mesh);
-    return { id: d.id, cx: d.cx, cy: d.cy, mesh, mat, edgeMat, pulse: 0 };
+    const group = new THREE.Group();
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0xd97706, emissive: 0xd97706, emissiveIntensity: 0.35, roughness: 0.4 });
+    group.add(new THREE.Mesh(new THREE.TorusGeometry(d.r, 0.05, 16, 64), ringMat));
+    const discMat = new THREE.MeshBasicMaterial({ color: 0xd97706, transparent: true, opacity: 0.08, depthWrite: false });
+    group.add(new THREE.Mesh(new THREE.CircleGeometry(d.r, 48), discMat));
+    group.position.set(d.cx, d.cy, 0);
+    scene.add(group);
+    // 바닥 마커(저비용 원 하나)
+    const markMat = new THREE.MeshBasicMaterial({ color: 0xd97706, transparent: true, opacity: 0.12, depthWrite: false });
+    const mark = new THREE.Mesh(new THREE.CircleGeometry(d.r * 0.6, 32).rotateX(-Math.PI / 2), markMat);
+    mark.position.set(d.cx, 0.01, 0);
+    scene.add(mark);
+    return { id: d.id, cx: d.cx, cy: d.cy, group, ringMat, discMat, markMat, pulse: 0 };
   });
 
   // ---------- shuttle mesh ----------
@@ -411,8 +416,10 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
     trailMat.uniforms.uColor.value.setHex(c.accent);
     pMat.uniforms.uColor.value.setHex(c.accent);
     for (const z of zones) {
-      z.mat.color.setHex(c.accent);
-      z.edgeMat.color.setHex(c.accent);
+      z.ringMat.color.setHex(c.accent);
+      z.ringMat.emissive.setHex(c.accent);
+      z.discMat.color.setHex(c.accent);
+      z.markMat.color.setHex(c.accent);
     }
     frameMat.color.setHex(c.accent);
   }
@@ -446,9 +453,10 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
     racketGroup.scale.setScalar(1 + racketPop * 0.25);
     // 영역
     for (const z of zones) {
-      z.pulse = Math.max(0, z.pulse - v.dt * 1.8);
-      z.mat.opacity = 0.14 + 0.05 * Math.sin(v.time * 2 + z.cx) + z.pulse * 0.5;
-      z.mesh.scale.setScalar(1 + z.pulse * 0.14);
+      z.pulse = Math.max(0, z.pulse - v.dt * 2.5);
+      z.ringMat.emissiveIntensity = 0.35 + 0.1 * Math.sin(v.time * 2 + z.cx) + z.pulse * 1.2;
+      z.discMat.opacity = 0.08 + z.pulse * 0.15;
+      z.group.scale.setScalar(1 + z.pulse * 0.15);
     }
     // 카메라 흔들림
     shake *= Math.exp(-v.dt * 11);

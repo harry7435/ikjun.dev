@@ -278,13 +278,13 @@ export interface Zone {
   href: string;
   cx: number;
   cy: number;
-  w: number;
-  h: number;
+  /** 링 내부(판정) 반지름, m */
+  r: number;
 }
 
 export const ZONES: readonly Zone[] = [
-  { id: "about", label: "About", href: "/about", cx: 2.8, cy: 2.5, w: 1.5, h: 1.1 },
-  { id: "blog", label: "Blog", href: "/blog", cx: 5.0, cy: 1.05, w: 1.5, h: 1.3 },
+  { id: "about", label: "About", href: "/about", cx: 2.8, cy: 2.5, r: 0.7 },
+  { id: "blog", label: "Blog", href: "/blog", cx: 5.0, cy: 1.05, r: 0.7 },
 ];
 
 const ZONE_COOLDOWN = 1.5;
@@ -339,8 +339,7 @@ export function tickGame(g: Game, racket: Racket | null, opts?: { holdServe?: bo
       s.byPlayer &&
       !s.resting &&
       sp > 2 &&
-      Math.abs(s.x - z.cx) < z.w / 2 &&
-      Math.abs(s.y - z.cy) < z.h / 2
+      Math.hypot(s.x - z.cx, s.y - z.cy) < z.r
     ) {
       g.zoneCd[z.id] = ZONE_COOLDOWN;
       events.push({ type: "zone", zone: z });

@@ -197,9 +197,21 @@ test("정착 후 1.2초 지나면 재서브", () => {
   assert.ok(g.shuttle.airTime < 4, "재서브되어 체공 시간이 리셋돼야 함");
 });
 
-test("영역 박스는 바닥(0)과 겹치지 않고 네트 오른쪽에 있다", () => {
+test("링은 바닥과 겹치지 않고 네트 오른쪽에 있다", () => {
   for (const z of ZONES) {
-    assert.ok(z.cy - z.h / 2 > 0.2, z.id);
-    assert.ok(z.cx - z.w / 2 > NET_X + 1, z.id);
+    assert.ok(z.cy - z.r > 0.2, z.id);
+    assert.ok(z.cx - z.r > NET_X + 1, z.id);
   }
+});
+
+test("링 중심을 지나는 타구는 zone 이벤트, 옛 박스 모서리(원 바깥)는 이벤트 없음", () => {
+  const about = ZONES.find((z) => z.id === "about") as Zone;
+  const at = (x: number, y: number) => {
+    const g = createGame(() => 0.5);
+    g.waitingServe = false;
+    Object.assign(g.shuttle, { x, y, px: x, py: y, vx: -5, vy: 0, resting: false, byPlayer: true });
+    return tickFor(g, DT);
+  };
+  assert.ok(at(about.cx, about.cy).includes("zone:about"));
+  assert.ok(!at(about.cx + 0.65, about.cy + 0.5).includes("zone:about"));
 });

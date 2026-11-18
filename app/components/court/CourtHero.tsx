@@ -131,11 +131,12 @@ export default function CourtHero() {
         for (const z of ZONES) {
           const el = zoneRefs.current[z.id];
           if (!el) continue;
-          const tl = scene.worldToScreen(z.cx - z.w / 2, z.cy + z.h / 2);
-          const br = scene.worldToScreen(z.cx + z.w / 2, z.cy - z.h / 2);
-          el.style.width = `${br.x - tl.x}px`;
-          el.style.height = `${br.y - tl.y}px`;
-          el.style.transform = `translate(${tl.x}px, ${tl.y}px)`;
+          const c = scene.worldToScreen(z.cx, z.cy);
+          const edge = scene.worldToScreen(z.cx + z.r, z.cy);
+          const rad = Math.abs(edge.x - c.x);
+          el.style.width = `${rad * 2}px`;
+          el.style.height = `${rad * 2}px`;
+          el.style.transform = `translate(${c.x - rad}px, ${c.y - rad}px)`;
         }
       };
 
@@ -232,7 +233,7 @@ export default function CourtHero() {
         if (pz && pel) {
           const z = ZONES.find((q) => q.id === pz);
           if (z) {
-            const p = scene.worldToScreen(z.cx, z.cy + z.h / 2);
+            const p = scene.worldToScreen(z.cx, z.cy + z.r);
             pel.style.transform = `translate(${p.x}px, ${p.y - 12}px) translate(-50%, -100%)`;
           }
         }

@@ -71,12 +71,10 @@ export default function StaticCourt() {
           aria-label={`${z.label} 페이지로 이동`}
           className="group outline-none"
         >
-          <rect
-            x={VX(z.cx - z.w / 2)}
-            y={VY(z.cy + z.h / 2)}
-            width={z.w * 100}
-            height={z.h * 100}
-            rx={10}
+          <circle
+            cx={VX(z.cx)}
+            cy={VY(z.cy)}
+            r={z.r * 100}
             className="fill-amber-600/15 stroke-amber-600 transition-colors group-hover:fill-amber-600/30 group-focus-visible:stroke-[6] dark:fill-amber-500/15 dark:stroke-amber-500"
             strokeWidth={3}
           />

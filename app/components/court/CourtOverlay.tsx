@@ -41,7 +41,7 @@ export default function CourtOverlay({
           aria-label={`${z.label} 페이지로 이동`}
           onPointerEnter={() => onLinkHover(true)}
           onPointerLeave={() => onLinkHover(false)}
-          className="pointer-events-auto absolute left-0 top-0 flex cursor-pointer items-center justify-center rounded-lg text-lg font-extrabold text-amber-700 will-change-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 dark:text-amber-400"
+          className="pointer-events-auto absolute left-0 top-0 flex cursor-pointer items-center justify-center rounded-full text-lg font-extrabold text-amber-700 will-change-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 dark:text-amber-400"
         >
           {z.label}
         </Link>
