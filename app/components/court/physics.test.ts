@@ -132,6 +132,34 @@ test("게임 시작 0.6초 뒤 첫 서브", () => {
   assert.equal(g.shuttle.resting, false);
 });
 
+function tickHold(g: ReturnType<typeof createGame>, seconds: number, holdServe: boolean) {
+  for (let t = 0; t < seconds; t += DT) tickGame(g, null, { holdServe });
+}
+
+test("holdServe: 첫 서브도 막는다", () => {
+  const g = createGame(() => 0.5);
+  tickHold(g, 5, true);
+  assert.equal(g.waitingServe, true);
+  assert.equal(g.shuttle.resting, true);
+  tickHold(g, 0.7, false);
+  assert.equal(g.shuttle.resting, false);
+});
+
+test("holdServe: 정지한 셔틀은 5초간 서브되지 않고, 해제 후 REST_TIME 내에 서브된다", () => {
+  const g = createGame(() => 0.5);
+  tickFor(g, 0.7); // 첫 서브
+  assert.equal(g.shuttle.resting, false);
+  tickHold(g, 15, true); // 안착
+  assert.equal(g.waitingServe, true);
+  assert.equal(g.shuttle.resting, true);
+  tickHold(g, 5, true);
+  assert.equal(g.waitingServe, true);
+  assert.equal(g.shuttle.resting, true);
+  tickHold(g, 1.2 + 0.1, false);
+  assert.equal(g.waitingServe, false);
+  assert.equal(g.shuttle.resting, false);
+});
+
 test("zone 판정은 플레이어 타구만 — 서브 셔틀이 영역을 지나가도 이벤트 없음", () => {
   const g = createGame(() => 0.5);
   const about = ZONES.find((z) => z.id === "about") as Zone;

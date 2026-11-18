@@ -170,7 +170,9 @@ export default function CourtHero() {
 
         while (acc >= DT) {
           acc -= DT;
-          for (const ev of tickGame(game, swingActive ? racket : null)) {
+          for (const ev of tickGame(game, swingActive ? racket : null, {
+            holdServe: popoverZoneRef.current !== null,
+          })) {
             const s = game.shuttle;
             if (ev.type === "hit") {
               scene.burst(s.x, s.y, s.vx, s.vy, ev.speed);
@@ -182,8 +184,10 @@ export default function CourtHero() {
                 speedT = 0.9;
               }
             } else if (ev.type === "zone") {
-              scene.pulseZone(ev.zone.id);
-              scene.burst(ev.zone.cx, ev.zone.cy, 0, 1, 14);
+              if (popoverZoneRef.current === null) {
+                scene.pulseZone(ev.zone.id);
+                scene.burst(ev.zone.cx, ev.zone.cy, 0, 1, 14);
+              }
               onZoneHitRef.current(ev.zone.id);
             }
           }

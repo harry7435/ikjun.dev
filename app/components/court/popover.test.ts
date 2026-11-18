@@ -6,14 +6,24 @@ test("명중하면 열린다", () => {
   assert.deepEqual(popoverReducer(null, { type: "hit", zone: "about", now: 1000 }), { zone: "about", openedAt: 1000 });
 });
 
-test("열린 상태에서 다른 영역 명중 시 교체", () => {
-  const s = popoverReducer({ zone: "about", openedAt: 0 }, { type: "hit", zone: "blog", now: 500 });
-  assert.deepEqual(s, { zone: "blog", openedAt: 500 });
+test("열린 상태에서 다른 영역 명중은 무시(처음 영역에 고정)", () => {
+  const open = { zone: "about" as const, openedAt: 0 };
+  const s = popoverReducer(open, { type: "hit", zone: "blog", now: 500 });
+  assert.equal(s, open);
+  assert.equal(s?.zone, "about");
+  assert.equal(s?.openedAt, 0);
 });
 
-test("같은 영역 재명중 시 타이머 연장", () => {
-  const s = popoverReducer({ zone: "about", openedAt: 0 }, { type: "hit", zone: "about", now: 5000 });
-  assert.equal(s?.openedAt, 5000);
+test("같은 영역 재명중은 타이머를 연장하지 않는다", () => {
+  const open = { zone: "about" as const, openedAt: 0 };
+  const s = popoverReducer(open, { type: "hit", zone: "about", now: 5000 });
+  assert.equal(s?.openedAt, 0);
+  assert.equal(popoverReducer(s, { type: "tick", now: POPOVER_TTL_MS }), null);
+});
+
+test("닫힌 뒤(dismiss) 새 명중은 새 영역으로 열린다", () => {
+  const closed = popoverReducer({ zone: "about", openedAt: 0 }, { type: "dismiss" });
+  assert.deepEqual(popoverReducer(closed, { type: "hit", zone: "blog", now: 700 }), { zone: "blog", openedAt: 700 });
 });
 
 test("6초 무응답이면 닫힌다(경계 포함)", () => {

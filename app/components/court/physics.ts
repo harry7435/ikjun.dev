@@ -314,8 +314,12 @@ export function createGame(rand: Rand = Math.random): Game {
   };
 }
 
-/** 고정 스텝(DT) 1회. racket이 null이면 타격 판정을 하지 않는다(링크·팝오버 호버 중). */
-export function tickGame(g: Game, racket: Racket | null): GameEvent[] {
+/**
+ * 고정 스텝(DT) 1회. racket이 null이면 타격 판정을 하지 않는다(링크·팝오버 호버 중).
+ * opts.holdServe가 true면 서브 대기 전환은 그대로지만 serveTimer를 줄이지 않고 서브하지 않는다
+ * (해제되면 남은 시간부터 이어서 카운트다운).
+ */
+export function tickGame(g: Game, racket: Racket | null, opts?: { holdServe?: boolean }): GameEvent[] {
   const s = g.shuttle;
   const events: GameEvent[] = [];
 
@@ -344,6 +348,7 @@ export function tickGame(g: Game, racket: Racket | null): GameEvent[] {
   }
 
   if (g.waitingServe) {
+    if (opts?.holdServe) return events;
     g.serveTimer -= DT;
     if (g.serveTimer <= 0) {
       serve(s, g.rand);
