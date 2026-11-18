@@ -5,10 +5,17 @@ import { motion } from "framer-motion";
 import { useInteractiveEnabled } from "../../hooks/useInteractiveEnabled";
 
 const CHANGES = [
-  "로그인 확인과 토큰 발급을 요청 하나로 합침",
-  "토큰 검증 2회 → 1회",
+  "로그인 확인과 토큰 발급을 한 요청으로 합침 (토큰 검증 2회 → 1회)",
+  "데모 쿠키 설정을 페이지 이동 요청 안으로 합침",
+  "광고 집계용 Meta 이벤트는 응답을 기다리지 않게 바꿈",
   "이전 개발자가 남겨둔 임시 2초 대기 코드 제거",
   "인증 실패 시 안내 메시지 추가",
+];
+
+const AFTER_ROWS: { label: string; noWait?: boolean }[] = [
+  { label: "로그인 확인 + 토큰 발급" },
+  { label: "페이지 이동 + 데모 쿠키 설정" },
+  { label: "광고 집계용 Meta 이벤트", noWait: true },
 ];
 
 // 재생 순서: 이전 행 1,2 -> 대기 블록 -> 이전 행 3,4,5 -> 이후 행 1,2,3
@@ -23,7 +30,17 @@ function afterRows(p: number) {
   return Math.max(0, p - 6);
 }
 
-function Row({ index, visible }: { index: number; visible: boolean }) {
+function Row({
+  index,
+  visible,
+  label,
+  noWait,
+}: {
+  index: number;
+  visible: boolean;
+  label?: string;
+  noWait?: boolean;
+}) {
   return (
     <motion.div
       initial={false}
@@ -34,18 +51,36 @@ function Row({ index, visible }: { index: number; visible: boolean }) {
       <span className="w-3 shrink-0 pt-0.5 text-right font-mono text-[10px] text-gray-500 dark:text-gray-500">
         {index}
       </span>
-      <div className="flex-1 space-y-1 border-x border-gray-400 px-1 dark:border-gray-600">
+      <div className="min-w-0 flex-1 space-y-1 border-x border-gray-400 px-1 dark:border-gray-600">
+        {label && (
+          <p className="break-keep text-[11px] leading-tight text-gray-700 dark:text-gray-300">
+            {label}
+          </p>
+        )}
         <div aria-hidden="true" className="flex items-center text-amber-500">
           <span className="h-px flex-1 bg-amber-500" />
           <span className="-ml-0.5 text-[10px] leading-none">▶</span>
         </div>
         <div
           aria-hidden="true"
-          className="flex items-center text-gray-400 dark:text-gray-500"
+          className={`flex items-center text-gray-400 dark:text-gray-500 ${
+            noWait ? "opacity-40" : ""
+          }`}
         >
           <span className="-mr-0.5 text-[10px] leading-none">◀</span>
-          <span className="h-px flex-1 bg-gray-400 dark:bg-gray-500" />
+          <span
+            className={`flex-1 ${
+              noWait
+                ? "border-t border-dashed border-gray-400 dark:border-gray-500"
+                : "h-px bg-gray-400 dark:bg-gray-500"
+            }`}
+          />
         </div>
+        {noWait && (
+          <p className="text-right text-[10px] leading-none text-gray-500 dark:text-gray-400">
+            응답 안 기다림
+          </p>
+        )}
       </div>
     </motion.div>
   );
@@ -53,24 +88,40 @@ function Row({ index, visible }: { index: number; visible: boolean }) {
 
 function Panel({
   title,
+  note,
   rows,
   shown,
+  waited,
   wait,
   waitVisible,
   badge,
   accent,
 }: {
   title: string;
-  rows: number;
+  note?: string;
+  rows: {
+    label?: string;
+    noWait?: boolean;
+  }[];
   shown: number;
+  waited: number;
   wait: boolean;
   waitVisible: boolean;
   badge: string;
   accent: boolean;
 }) {
   const items: React.ReactNode[] = [];
-  for (let i = 1; i <= rows; i++) {
-    items.push(<Row key={i} index={i} visible={i <= shown} />);
+  for (let i = 1; i <= rows.length; i++) {
+    const r = rows[i - 1];
+    items.push(
+      <Row
+        key={i}
+        index={i}
+        visible={i <= shown}
+        label={r.label}
+        noWait={r.noWait}
+      />
+    );
     if (wait && i === 2) {
       items.push(
         <motion.div
@@ -93,21 +144,25 @@ function Panel({
 
   return (
     <div className="rounded-md border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-950">
-      <div className="mb-3 flex items-baseline justify-between gap-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-2">
         <p className="font-mono text-xs font-semibold text-gray-700 dark:text-gray-300">
           {title}
         </p>
         <p
           aria-live="off"
-          className={`font-mono text-xs font-semibold ${
-            accent
-              ? "text-amber-600 dark:text-amber-400"
-              : "text-gray-600 dark:text-gray-400"
-          }`}
+          className="font-mono text-xs font-semibold text-gray-600 dark:text-gray-400"
         >
-          서버 요청 {shown}회
+          서버 요청 {shown}회 ·{" "}
+          <span
+            className={accent ? "text-amber-600 dark:text-amber-400" : ""}
+          >
+            기다림 {waited}회
+          </span>
         </p>
       </div>
+      <p className="mb-3 mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+        {note ?? "\u00a0"}
+      </p>
       <div className="mb-1 flex justify-between pl-5 text-[11px] font-medium text-gray-600 dark:text-gray-400">
         <span>브라우저</span>
         <span>서버</span>
@@ -157,8 +212,10 @@ export default function SplashRoundTripDemo() {
       <div className="grid gap-3 sm:grid-cols-2">
         <Panel
           title="이전"
-          rows={5}
+          note="서버 액션 5개를 순서대로 기다림"
+          rows={[{}, {}, {}, {}, {}]}
           shown={beforeRows(p)}
+          waited={beforeRows(p)}
           wait
           waitVisible={p >= WAIT_EVENT}
           badge="토큰 검증 ×2"
@@ -166,8 +223,9 @@ export default function SplashRoundTripDemo() {
         />
         <Panel
           title="이후"
-          rows={3}
+          rows={AFTER_ROWS}
           shown={afterRows(p)}
+          waited={Math.min(afterRows(p), 2)}
           wait={false}
           waitVisible
           badge="토큰 검증 ×1"
@@ -207,7 +265,7 @@ export default function SplashRoundTripDemo() {
       </div>
 
       <p className="mt-3 text-xs text-gray-500 dark:text-gray-500">
-        개념도입니다. 각 요청의 내용과 간격은 표시하지 않았습니다.
+        개념도입니다. 이전 요청 5개의 구성과 순서, 요청 간격은 표시하지 않았습니다.
       </p>
     </div>
   );
