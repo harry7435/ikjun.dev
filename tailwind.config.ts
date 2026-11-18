@@ -9,15 +9,15 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
-      // court: useInteractiveEnabled 훅의 조건과 동일하게 유지할 것.
-      // serve: useServeCourtEnabled의 SERVE_QUERY와 동일하게 유지할 것 — court(+no-preference)의 여집합
-      // (hover:hover+pointer:fine이면 court, 그 외 no-preference는 모두 serve; hover:none+pointer:fine·hover:hover+pointer:coarse 혼합 기기도 serve).
+      // court: useCourtEnabled 훅의 조건과 동일하게 유지할 것. reduced-motion은 보지 않는다(홈 코트는 reduce여도 표시).
+      // serve: useServeCourtEnabled의 SERVE_QUERY와 동일하게 유지할 것 — court의 여집합
+      // (hover:hover+pointer:fine이면 court, 그 외는 모두 serve; hover:none+pointer:fine·hover:hover+pointer:coarse 혼합 기기도 serve).
       screens: {
         court: {
-          raw: "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+          raw: "(hover: hover) and (pointer: fine)",
         },
         serve: {
-          raw: "(prefers-reduced-motion: no-preference) and (hover: none), (prefers-reduced-motion: no-preference) and (pointer: coarse), (prefers-reduced-motion: no-preference) and (pointer: none)",
+          raw: "(hover: none), (pointer: coarse), (pointer: none)",
         },
       },
       colors: {

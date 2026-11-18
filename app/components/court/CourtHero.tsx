@@ -2,7 +2,8 @@
 
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { useInteractiveEnabled } from "@/app/hooks/useInteractiveEnabled";
+import { useCourtEnabled } from "@/app/hooks/useCourtEnabled";
+import { prefersReducedMotion } from "@/app/hooks/prefersReducedMotion";
 import CourtOverlay from "./CourtOverlay";
 import { popoverReducer } from "./popover";
 import { usePopoverDismiss } from "./usePopoverDismiss";
@@ -35,11 +36,11 @@ const idle = (cb: () => void): (() => void) => {
 };
 
 /**
- * 홈 배드민턴 히어로. 게이트(useInteractiveEnabled) 통과 시에만 idle 시점에 three 장면을 동적 import.
+ * 홈 배드민턴 히어로. 게이트(useCourtEnabled) 통과 시에만 idle 시점에 three 장면을 동적 import.
  * 그 전/실패/게이트 false에는 StaticCourt. 루프는 탭 숨김·뷰포트 밖에서 정지한다.
  */
 export default function CourtHero() {
-  const enabled = useInteractiveEnabled();
+  const enabled = useCourtEnabled();
   const { resolvedTheme } = useTheme();
   const theme: Theme = resolvedTheme === "dark" ? "dark" : "light";
   const themeRef = useRef(theme);
@@ -93,7 +94,8 @@ export default function CourtHero() {
     function start(createScene: typeof import("./scene").createScene) {
       const canvas = canvasRef.current as HTMLCanvasElement;
       const stage = stageRef.current as HTMLDivElement;
-      const scene = createScene(canvas, themeRef.current);
+      const reduced = prefersReducedMotion();
+      const scene = createScene(canvas, themeRef.current, reduced);
       sceneRef.current = scene;
       const game = createGame();
       const racket: Racket = { x: -3, y: 1.2, px: -3, py: 1.2, vx: 0, vy: 0 };
@@ -262,7 +264,7 @@ export default function CourtHero() {
             speedT -= dt;
             const t = Math.max(0, speedT / 0.9);
             sp.style.opacity = String(Math.min(1, t * 2.5));
-            sp.style.transform = `translate(${speedPos.x}px, ${speedPos.y - (1 - t) * 36}px) translate(-50%, -100%)`;
+            sp.style.transform = `translate(${speedPos.x}px, ${speedPos.y - (reduced ? 0 : (1 - t) * 36)}px) translate(-50%, -100%)`;
           } else sp.style.opacity = "0";
         }
 
@@ -370,7 +372,10 @@ export default function CourtHero() {
       setCursorHidden(false);
       return;
     }
-    const id = window.setTimeout(() => setCursorHidden(true), 300);
+    const id = window.setTimeout(
+      () => setCursorHidden(true),
+      prefersReducedMotion() ? 0 : 300
+    );
     return () => window.clearTimeout(id);
   }, [show3D]);
   const failed = phase === "failed";
@@ -393,7 +398,7 @@ export default function CourtHero() {
         <canvas
           ref={canvasRef}
           aria-hidden
-          className={`absolute inset-0 size-full transition-opacity duration-300 ${show3D ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 size-full transition-opacity duration-300 motion-reduce:transition-none ${show3D ? "opacity-100" : "opacity-0"}`}
         />
       )}
       {show3D && (

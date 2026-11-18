@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type MutableRefObject, type RefObject } from "react";
+import { prefersReducedMotion } from "@/app/hooks/prefersReducedMotion";
 import { ZONES, type ZoneId } from "./physics";
 import type { PopoverState } from "./popover";
 
@@ -35,7 +36,10 @@ export default function CourtOverlay({
   // 3D 등장 연출: 코트 크로스페이드(300ms) 뒤 링과 함께 라벨이 페이드인. 링크는 처음부터 포커스 가능.
   const [shown, setShown] = useState(false);
   useEffect(() => {
-    const id = window.setTimeout(() => setShown(true), 300);
+    const id = window.setTimeout(
+      () => setShown(true),
+      prefersReducedMotion() ? 0 : 300
+    );
     return () => window.clearTimeout(id);
   }, []);
   return (
@@ -50,7 +54,7 @@ export default function CourtOverlay({
           aria-label={`${z.label} 페이지로 이동`}
           onPointerEnter={() => onLinkHover(true)}
           onPointerLeave={() => onLinkHover(false)}
-          className={`pointer-events-auto absolute left-0 top-0 flex cursor-pointer items-center justify-center rounded-full text-lg font-extrabold text-amber-800 will-change-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 dark:text-amber-400 ${shown ? "opacity-100 transition-opacity duration-[250ms]" : "opacity-0 focus-visible:opacity-100"}`}
+          className={`pointer-events-auto absolute left-0 top-0 flex cursor-pointer items-center justify-center rounded-full text-lg font-extrabold text-amber-800 will-change-transform focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500 dark:text-amber-400 ${shown ? "opacity-100 transition-opacity duration-[250ms] motion-reduce:transition-none" : "opacity-0 focus-visible:opacity-100"}`}
         >
           {z.label}
         </Link>

@@ -34,6 +34,8 @@ export type Theme = "light" | "dark";
 export interface ServeSceneOptions {
   canvas: HTMLCanvasElement;
   theme: Theme;
+  /** reduce: 링 히트 펄스를 끈다(당김·스윙·발사 등 사용자 동작에 따른 움직임은 유지) */
+  reducedMotion?: boolean;
   /** 팝오버가 열려 있으면 true → 재장전 보류 */
   isHeld: () => boolean;
   onZone: (id: ZoneId) => void;
@@ -330,7 +332,7 @@ export function createServeScene(opts: ServeSceneOptions): ServeSceneHandle {
       acc -= DT;
       for (const ev of tickServeGame(game, { holdServe: opts.isHeld(), view: viewX() })) {
         if (ev.type === "zone") {
-          if (!opts.isHeld()) pulse[ev.zone.id] = 1;
+          if (!opts.isHeld() && !opts.reducedMotion) pulse[ev.zone.id] = 1;
           opts.onZone(ev.zone.id);
         }
       }

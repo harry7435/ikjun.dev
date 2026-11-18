@@ -63,7 +63,8 @@ const THEMES = {
   dark: { bg: 0x111827, court: 0x25344a, line: 0xe5e7eb, net: 0xd6d3d1, accent: 0xf59e0b, hemi: 1.1, dir: 1.7, shadow: 0.55 },
 } as const;
 
-export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandle {
+/** reducedMotion: 등장 연출·카메라 흔들림·링 펄스/반짝임을 끈다(사용자 동작에 반응하는 움직임은 유지). */
+export function createScene(canvas: HTMLCanvasElement, theme: Theme, reducedMotion = false): SceneHandle {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.shadowMap.enabled = true;
@@ -409,7 +410,7 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
   let shake = 0;
   let tilt = 0;
   let racketPop = 0;
-  let introT = 0;
+  let introT = reducedMotion ? INTRO_SHUTTLE_AT : 0;
   let racketScale = 0.6;
   let introK = 0; // 링·라켓 등장 진행(0~1), 펄스 등 per-frame 불투명도 갱신에도 곱한다
   let introFinished = false;
@@ -497,9 +498,9 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
     // 영역
     for (const z of zones) {
       z.pulse = Math.max(0, z.pulse - v.dt * 2.5);
-      z.ringMat.emissiveIntensity = 0.35 + 0.1 * Math.sin(v.time * 2 + z.cx) + z.pulse * 1.2;
-      z.discMat.opacity = (0.08 + z.pulse * 0.15) * introK;
-      z.group.scale.setScalar(1 + z.pulse * 0.15);
+      z.ringMat.emissiveIntensity = 0.35 + (reducedMotion ? 0 : 0.1 * Math.sin(v.time * 2 + z.cx) + z.pulse * 1.2);
+      z.discMat.opacity = (0.08 + (reducedMotion ? 0 : z.pulse * 0.15)) * introK;
+      z.group.scale.setScalar(reducedMotion ? 1 : 1 + z.pulse * 0.15);
     }
     // 카메라 흔들림
     shake *= Math.exp(-v.dt * 11);
@@ -535,7 +536,7 @@ export function createScene(canvas: HTMLCanvasElement, theme: Theme): SceneHandl
     render,
     burst,
     shake: (a) => {
-      shake = Math.min(0.14, a);
+      shake = reducedMotion ? 0 : Math.min(0.14, a);
     },
     pulseZone: (id) => {
       const z = zones.find((q) => q.id === id);

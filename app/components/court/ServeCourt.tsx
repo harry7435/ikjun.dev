@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { prefersReducedMotion } from "@/app/hooks/prefersReducedMotion";
 import { useServeCourtEnabled } from "@/app/hooks/useServeCourtEnabled";
 import CourtOverlay from "./CourtOverlay";
 import { SERVE_ZONES as ZONES, type ZoneId } from "./physics";
@@ -83,6 +84,7 @@ export default function ServeCourt() {
         const scene = createServeScene({
           canvas: canvasRef.current,
           theme: themeRef.current,
+          reducedMotion: prefersReducedMotion(),
           isHeld: () => popoverZoneRef.current !== null,
           onZone: (id) => dispatch({ type: "hit", zone: id, now: performance.now() }),
           onReady: setReady,
@@ -183,7 +185,7 @@ export default function ServeCourt() {
     <div className="relative z-[2]">
       <p
         aria-hidden
-        className={`mb-1 h-4 text-center text-xs font-medium leading-4 text-stone-600 transition-opacity dark:text-gray-300 ${live && ready ? "opacity-100" : "opacity-0"}`}
+        className={`mb-1 h-4 text-center text-xs font-medium leading-4 text-stone-600 transition-opacity motion-reduce:transition-none dark:text-gray-300 ${live && ready ? "opacity-100" : "opacity-0"}`}
       >
         라켓을 당겼다 놓아 링을 맞혀 보세요
       </p>
@@ -194,7 +196,7 @@ export default function ServeCourt() {
         <div
           inert={live}
           aria-hidden
-          className={`absolute inset-0 transition-opacity duration-300 ${live ? "opacity-0" : "opacity-100"}`}
+          className={`absolute inset-0 transition-opacity duration-300 motion-reduce:transition-none ${live ? "opacity-0" : "opacity-100"}`}
         >
           <StaticPlaceholder />
         </div>
@@ -202,7 +204,7 @@ export default function ServeCourt() {
           <canvas
             ref={canvasRef}
             aria-hidden
-            className={`absolute inset-0 size-full transition-opacity duration-300 ${live ? "opacity-100" : "opacity-0"}`}
+            className={`absolute inset-0 size-full transition-opacity duration-300 motion-reduce:transition-none ${live ? "opacity-100" : "opacity-0"}`}
             style={{ touchAction: "pan-y pinch-zoom" }}
           />
         )}
