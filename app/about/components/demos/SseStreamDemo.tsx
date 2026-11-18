@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useInteractiveEnabled } from "../../hooks/useInteractiveEnabled";
+import { useInteractiveEnabled } from "@/app/hooks/useInteractiveEnabled";
 
 const SENTENCE =
   "라이브러리 없이 fetch와 ReadableStream reader로 SSE 응답을 읽어, 생성되는 대로 화면에 출력. 출력 중지 시 AbortController로 연결을 끊고, 새 요청을 시작하면 이전 요청을 먼저 중단.";

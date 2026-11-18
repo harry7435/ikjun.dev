@@ -1,0 +1,411 @@
+"use client";
+
+import { useTheme } from "next-themes";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useInteractiveEnabled } from "@/app/hooks/useInteractiveEnabled";
+import CourtOverlay from "./CourtOverlay";
+import { popoverReducer } from "./popover";
+import { usePopoverDismiss } from "./usePopoverDismiss";
+import StaticCourt from "./StaticCourt";
+import CourtLayer from "./CourtLayer";
+import {
+  DT,
+  RACKET_MAX_X,
+  ZONES,
+  createGame,
+  shouldShowSpeed,
+  tickGame,
+  toKmh,
+  type Racket,
+  type ZoneId,
+} from "./physics";
+import type { SceneHandle, Theme } from "./scene";
+
+/** static: 게이트 false(PC 레이아웃에서는 보이지 않음) · loading: 코트만 · ready: 3D · failed: 로드 실패/컨텍스트 손실 */
+type Phase = "static" | "loading" | "ready" | "failed";
+
+/** idle 시점 실행 예약. 취소 함수를 반환한다(requestIdleCallback 미지원 시 setTimeout). */
+const idle = (cb: () => void): (() => void) => {
+  if (typeof window.requestIdleCallback === "function") {
+    const id = window.requestIdleCallback(cb, { timeout: 1500 });
+    return () => window.cancelIdleCallback(id);
+  }
+  const id = window.setTimeout(cb, 200);
+  return () => window.clearTimeout(id);
+};
+
+/**
+ * 홈 배드민턴 히어로. 게이트(useInteractiveEnabled) 통과 시에만 idle 시점에 three 장면을 동적 import.
+ * 그 전/실패/게이트 false에는 StaticCourt. 루프는 탭 숨김·뷰포트 밖에서 정지한다.
+ */
+export default function CourtHero() {
+  const enabled = useInteractiveEnabled();
+  const { resolvedTheme } = useTheme();
+  const theme: Theme = resolvedTheme === "dark" ? "dark" : "light";
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
+
+  const [phase, setPhase] = useState<Phase>("static");
+  const stageRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const sceneRef = useRef<SceneHandle | null>(null);
+  const zoneRefs = useRef<Record<ZoneId, HTMLAnchorElement | null>>({
+    about: null,
+    blog: null,
+  });
+  const speedRef = useRef<HTMLDivElement>(null);
+  const hoveringLinkRef = useRef(false);
+  const onLinkHover = useCallback((h: boolean) => {
+    hoveringLinkRef.current = h;
+  }, []);
+  const [popover, dispatch] = useReducer(popoverReducer, null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const popoverZoneRef = useRef<ZoneId | null>(null);
+  popoverZoneRef.current = popover?.zone ?? null;
+  const popClampRef = useRef({ headerBottom: -Infinity, height: 0 });
+  // dispatch는 안정 참조라 ref 갱신 불필요
+  const onZoneHitRef = useRef<(id: ZoneId) => void>((id) =>
+    dispatch({ type: "hit", zone: id, now: performance.now() })
+  );
+
+  useEffect(() => {
+    if (!enabled) {
+      setPhase("static");
+      dispatch({ type: "dismiss" });
+      return;
+    }
+    let cancelled = false;
+    let cleanup: (() => void) | null = null;
+    setPhase("loading");
+
+    const cancelIdle = idle(async () => {
+      try {
+        const { createScene } = await import("./scene");
+        // 로딩 중 언마운트/게이트 false 전환 — 아무것도 만들지 않는다(Review Focus 1)
+        if (cancelled || !canvasRef.current || !stageRef.current) return;
+        cleanup = start(createScene);
+      } catch (err) {
+        console.warn("[CourtHero] 3D 로드 실패, 정적 코트 유지", err);
+        if (!cancelled) setPhase("failed");
+      }
+    });
+
+    function start(createScene: typeof import("./scene").createScene) {
+      const canvas = canvasRef.current as HTMLCanvasElement;
+      const stage = stageRef.current as HTMLDivElement;
+      const scene = createScene(canvas, themeRef.current);
+      sceneRef.current = scene;
+      const game = createGame();
+      const racket: Racket = { x: -3, y: 1.2, px: -3, py: 1.2, vx: 0, vy: 0 };
+      let pointer: { x: number; y: number } | null = null;
+      let acc = 0;
+      let last = performance.now();
+      let raf = 0;
+      let running = false;
+      let first = true;
+      let inView = true;
+      let lost = false;
+      let hadPointer = false;
+      let farSide = false;
+      let speedT = 0;
+      let speedPos = { x: 0, y: 0 };
+
+      const rect = () => stage.getBoundingClientRect();
+      const resize = () => {
+        const r = rect();
+        scene.resize(r.width, r.height);
+      };
+      resize();
+      const ro = new ResizeObserver(resize);
+      ro.observe(stage);
+
+      const onMove = (e: PointerEvent) => {
+        const r = rect();
+        pointer = { x: e.clientX - r.left, y: e.clientY - r.top };
+      };
+      const onLeave = () => {
+        pointer = null;
+        farSide = false;
+        stage.style.cursor = "";
+      };
+      stage.addEventListener("pointermove", onMove, { passive: true });
+      stage.addEventListener("pointerleave", onLeave);
+
+      const placeOverlays = () => {
+        for (const z of ZONES) {
+          const el = zoneRefs.current[z.id];
+          if (!el) continue;
+          const c = scene.worldToScreen(z.cx, z.cy);
+          const edge = scene.worldToScreen(z.cx + z.r, z.cy);
+          const rad = Math.abs(edge.x - c.x);
+          el.style.width = `${rad * 2}px`;
+          el.style.height = `${rad * 2}px`;
+          el.style.transform = `translate(${c.x - rad}px, ${c.y - rad}px)`;
+        }
+      };
+
+      const frame = (now: number) => {
+        raf = requestAnimationFrame(frame);
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
+        // 등장 연출(코트 → 링·라켓 → 셔틀) 동안은 게임을 진행하지 않는다
+        if (scene.introDone()) acc += dt;
+        else acc = 0;
+
+        // 라켓: 포인터를 z=0 평면으로 투영, ~50ms 평활 속도
+        racket.px = racket.x;
+        racket.py = racket.y;
+        let onPlayerSide = false;
+        if (pointer) {
+          const w = scene.screenToWorld(pointer.x, pointer.y);
+          if (w) {
+            // 네트 너머(상대편)면 라켓을 내려놓은 것으로 취급: 숨김 + 시스템 커서
+            const far = w.x > RACKET_MAX_X;
+            if (far !== farSide) {
+              farSide = far;
+              stage.style.cursor = far ? "default" : "";
+            }
+            if (!far) {
+              onPlayerSide = true;
+              racket.x = w.x;
+              racket.y = Math.max(0.12, w.y);
+            }
+          }
+        }
+        if (onPlayerSide && !hadPointer) {
+          // 포인터 첫 샘플(초기/재진입): 긴 스윕·큰 속도 방지
+          racket.px = racket.x;
+          racket.py = racket.y;
+          racket.vx = 0;
+          racket.vy = 0;
+        } else {
+          const k = 1 - Math.exp(-Math.max(dt, 1e-3) / 0.05);
+          racket.vx +=
+            ((racket.x - racket.px) / Math.max(dt, 1e-3) - racket.vx) * k;
+          racket.vy +=
+            ((racket.y - racket.py) / Math.max(dt, 1e-3) - racket.vy) * k;
+        }
+        hadPointer = onPlayerSide;
+        const swingActive = onPlayerSide && !hoveringLinkRef.current;
+
+        while (acc >= DT) {
+          acc -= DT;
+          for (const ev of tickGame(game, swingActive ? racket : null, {
+            holdServe: popoverZoneRef.current !== null,
+          })) {
+            const s = game.shuttle;
+            if (ev.type === "hit") {
+              scene.burst(s.x, s.y, s.vx, s.vy, ev.speed);
+              scene.shake(ev.speed * 0.0036);
+              scene.popRacket();
+              if (shouldShowSpeed(ev.speed) && speedRef.current) {
+                speedRef.current.textContent = `${toKmh(ev.speed)} km/h`;
+                speedPos = scene.worldToScreen(s.x, s.y + 0.3);
+                speedT = 0.9;
+              }
+            } else if (ev.type === "zone") {
+              if (popoverZoneRef.current === null) {
+                scene.pulseZone(ev.zone.id);
+                scene.burst(ev.zone.cx, ev.zone.cy, 0, 1, 14);
+              }
+              onZoneHitRef.current(ev.zone.id);
+            }
+          }
+        }
+
+        const s = game.shuttle;
+        const a = acc / DT;
+        scene.render({
+          shuttle: {
+            x: s.px + (s.x - s.px) * a,
+            y: s.py + (s.y - s.py) * a,
+            ang: s.pang + (s.ang - s.pang) * a,
+            spin: s.pspin + (s.spin - s.pspin) * a,
+            speed: Math.hypot(s.vx, s.vy),
+          },
+          racket: {
+            x: racket.x,
+            y: racket.y,
+            vx: racket.vx,
+            visible: swingActive,
+          },
+          dt,
+          time: now / 1000,
+        });
+        placeOverlays();
+
+        const pz = popoverZoneRef.current;
+        const pel = popoverRef.current;
+        if (pz && pel) {
+          const z = ZONES.find((q) => q.id === pz);
+          if (z) {
+            // 다른 링이 위에 있으면(아래 링) 팝오버를 링 아래에 둬 위 링을 가리지 않게 한다
+            const below = ZONES.some((o) => o.cy > z.cy);
+            if (below) {
+              const p = scene.worldToScreen(z.cx, z.cy - z.r);
+              pel.style.transform = `translate(${p.x}px, ${p.y + 12}px) translate(-50%, 0)`;
+            } else {
+              const p = scene.worldToScreen(z.cx, z.cy + z.r);
+              // 고정 헤더 아래로 클램프 (헤더 하단·팝오버 높이는 열림/리사이즈/스크롤 때만 측정)
+              const top = Math.max(
+                popClampRef.current.headerBottom + 8,
+                p.y - 12 - popClampRef.current.height
+              );
+              pel.style.transform = `translate(${p.x}px, ${top}px) translate(-50%, 0)`;
+            }
+          }
+        }
+
+        const sp = speedRef.current;
+        if (sp) {
+          if (speedT > 0) {
+            speedT -= dt;
+            const t = Math.max(0, speedT / 0.9);
+            sp.style.opacity = String(Math.min(1, t * 2.5));
+            sp.style.transform = `translate(${speedPos.x}px, ${speedPos.y - (1 - t) * 36}px) translate(-50%, -100%)`;
+          } else sp.style.opacity = "0";
+        }
+
+        if (first) {
+          first = false;
+          setPhase("ready");
+        }
+      };
+
+      const startLoop = () => {
+        if (lost || running || document.hidden || !inView) return;
+        running = true;
+        last = performance.now();
+        raf = requestAnimationFrame(frame);
+      };
+      const stopLoop = () => {
+        running = false;
+        cancelAnimationFrame(raf);
+      };
+      const onVis = () => (document.hidden ? stopLoop() : startLoop());
+      document.addEventListener("visibilitychange", onVis);
+      const io = new IntersectionObserver(([e]) => {
+        inView = e.isIntersecting;
+        if (inView) startLoop();
+        else stopLoop();
+      });
+      io.observe(stage);
+
+      const onLost = (e: Event) => {
+        e.preventDefault();
+        lost = true;
+        console.warn("[CourtHero] WebGL context lost, 정적 코트로 복귀");
+        stopLoop();
+        setPhase("failed");
+      };
+      canvas.addEventListener("webglcontextlost", onLost);
+
+      startLoop();
+      return () => {
+        stopLoop();
+        ro.disconnect();
+        io.disconnect();
+        document.removeEventListener("visibilitychange", onVis);
+        stage.removeEventListener("pointermove", onMove);
+        stage.removeEventListener("pointerleave", onLeave);
+        stage.style.cursor = "";
+        canvas.removeEventListener("webglcontextlost", onLost);
+        scene.dispose();
+        sceneRef.current = null;
+      };
+    }
+
+    return () => {
+      cancelled = true;
+      cancelIdle();
+      cleanup?.();
+    };
+  }, [enabled]);
+
+  usePopoverDismiss(popover, dispatch, popoverRef);
+
+  // 팝오버가 열려 있는 동안 헤더 하단(스테이지 좌표)·팝오버 높이를 갱신
+  useEffect(() => {
+    if (!popover) return;
+    const measure = () => {
+      const stage = stageRef.current;
+      const header = document.querySelector("header");
+      const pel = popoverRef.current;
+      if (!stage) return;
+      popClampRef.current = {
+        headerBottom: header
+          ? header.getBoundingClientRect().bottom -
+            stage.getBoundingClientRect().top
+          : -Infinity,
+        height: pel ? pel.offsetHeight : 0,
+      };
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, { passive: true });
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure);
+    };
+  }, [popover]);
+
+  // 팝오버가 닫히면 호버 플래그 리셋
+  useEffect(() => {
+    if (!popover)
+      hoveringLinkRef.current = ZONES.some((z) =>
+        zoneRefs.current[z.id]?.matches(":hover")
+      );
+  }, [popover]);
+
+  // 테마 변경: 장면 재생성 없이 조명·색만
+  useEffect(() => {
+    sceneRef.current?.setTheme(theme);
+  }, [theme]);
+
+  const show3D = phase === "ready";
+  // 라켓이 나타나는 시점(인트로 0.3s)에 맞춰 기본 커서를 숨긴다
+  const [cursorHidden, setCursorHidden] = useState(false);
+  useEffect(() => {
+    if (!show3D) {
+      setCursorHidden(false);
+      return;
+    }
+    const id = window.setTimeout(() => setCursorHidden(true), 300);
+    return () => window.clearTimeout(id);
+  }, [show3D]);
+  const failed = phase === "failed";
+  return (
+    <div
+      ref={stageRef}
+      className={`absolute inset-0 ${cursorHidden ? "cursor-none" : ""}`}
+    >
+      {/* 로딩 중엔 코트만. 3D가 위에서 불투명해진 뒤(300ms) 사라진다 */}
+      <CourtLayer
+        className="[--cl-court:#eed1a1] [--cl-line:#fef3de] [--cl-net:#57534e] [--cl-post:#30291f] [--cl-tape:#fef3de] dark:[--cl-court:#29313b] dark:[--cl-line:#cbc3b6] dark:[--cl-net:#d6d3d1] dark:[--cl-post:#28231c] dark:[--cl-tape:#ded5c7]"
+        hidden={show3D || failed}
+      />
+      {failed && (
+        <div className="absolute inset-0">
+          <StaticCourt />
+        </div>
+      )}
+      {enabled && (
+        <canvas
+          ref={canvasRef}
+          aria-hidden
+          className={`absolute inset-0 size-full transition-opacity duration-300 ${show3D ? "opacity-100" : "opacity-0"}`}
+        />
+      )}
+      {show3D && (
+        <CourtOverlay
+          zoneRefs={zoneRefs}
+          speedRef={speedRef}
+          onLinkHover={onLinkHover}
+          popover={popover}
+          onDismiss={() => dispatch({ type: "dismiss" })}
+          popoverRef={popoverRef}
+        />
+      )}
+    </div>
+  );
+}

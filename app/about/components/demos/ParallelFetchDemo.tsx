@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useInteractiveEnabled } from "../../hooks/useInteractiveEnabled";
+import { useInteractiveEnabled } from "@/app/hooks/useInteractiveEnabled";
 
 type Bar = {
   label: string;

@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
-import { useInteractiveEnabled } from "../../hooks/useInteractiveEnabled";
+import { useInteractiveEnabled } from "@/app/hooks/useInteractiveEnabled";
 
 interface MagneticButtonProps {
   children: React.ReactNode;

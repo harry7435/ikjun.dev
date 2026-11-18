@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useInteractiveEnabled } from "../../hooks/useInteractiveEnabled";
+import { useInteractiveEnabled } from "@/app/hooks/useInteractiveEnabled";
 
 interface Particle {
   x: number;

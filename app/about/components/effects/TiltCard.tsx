@@ -7,7 +7,7 @@ import {
   useMotionValue,
   useSpring,
 } from "framer-motion";
-import { useInteractiveEnabled } from "../../hooks/useInteractiveEnabled";
+import { useInteractiveEnabled } from "@/app/hooks/useInteractiveEnabled";
 
 interface TiltCardProps {
   children: React.ReactNode;

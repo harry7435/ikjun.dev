@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useInteractiveEnabled } from "../../hooks/useInteractiveEnabled";
+import { useInteractiveEnabled } from "@/app/hooks/useInteractiveEnabled";
 
 const STEPS = [
   "웹의 '내 강의실' 버튼으로 웹앱 이동, 토큰을 쿼리스트링으로 전달",
